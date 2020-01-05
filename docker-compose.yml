@@ -1,0 +1,25 @@
+version: "3"
+services:
+  scrapy:
+    container_name: scrapy-crawler
+    restart: always
+    build:
+      context: .
+    environment:
+        - TZ=Europe/Berlin
+        
+    network_mode: "host"
+    volumes:
+      - .:/crawler
+    ports:
+      - 5000:5000
+    deploy:
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 3g
+        reservations:
+          cpus: '0.35'
+          memory: 3g
+    
+
