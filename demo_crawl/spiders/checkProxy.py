@@ -1,5 +1,6 @@
 
 import scrapy
+import logging
 
 
 class CheckProxySpider(scrapy.Spider):
@@ -15,4 +16,4 @@ class CheckProxySpider(scrapy.Spider):
 
     def check_ip(self, response):
         pub_ip = response.xpath('//body/text()').re('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')[0]
-        print ("My public IP is: " + pub_ip)
+        logging.error("My public IP is: " + pub_ip)
