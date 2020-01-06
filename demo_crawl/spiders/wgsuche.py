@@ -11,16 +11,8 @@ import re
 import json
 from scrapy.exceptions import DropItem
 from database import DataBase
-from selenium.webdriver.support.ui import Select
 from demo_crawl import settings as my_settings
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium import webdriver
 import time
-from selenium.webdriver import ActionChains
 from ExtractViertel import ExtractViertel
 #from fake_useragent import UserAgent
 from scrapy import signals

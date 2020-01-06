@@ -9,13 +9,6 @@ from demo_crawl.items import ImmobilieItem
 from scrapy.loader import ItemLoader
 from scrapy_splash import SplashRequest
 from database import DataBase
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium import webdriver
 import time
 import logging
 from scrapy.utils.log import configure_logging
@@ -23,10 +16,8 @@ from ExtractViertel import ExtractViertel
 from scrapy import signals
 from scrapy.http import FormRequest
 import json
-from selenium.webdriver.common.action_chains import ActionChains
 from scrapy.exceptions import DropItem
 import traceback
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 class ImmoweltSpider(scrapy.Spider):
