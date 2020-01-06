@@ -10,7 +10,6 @@ from demo_crawl.items import ImmobilieItem
 from scrapy.loader import ItemLoader
 import time
 from scrapy import signals
-from selenium.webdriver.common.action_chains import ActionChains
 import logging
 from scrapy.utils.log import configure_logging
 import csv
