@@ -10,8 +10,7 @@ class CheckProxySpider(scrapy.Spider):
     }
     
     def start_requests(self):
-        for x in range(25):
-            yield scrapy.Request('http://checkip.dyndns.org/', callback=self.check_ip)
+        yield scrapy.Request('http://checkip.dyndns.org/', callback=self.check_ip)
      
 
     def check_ip(self, response):
