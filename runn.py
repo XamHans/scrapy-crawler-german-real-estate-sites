@@ -24,33 +24,39 @@ from scrapy.utils.log import configure_logging
 import sys
 import subprocess
 from sys import exit
-
+import requests
+import json
 settings = get_project_settings()
 stadtCounter = 0
 db = DataBase()
-conn = db.create_conn()
+# conn = db.create_conn()
 currentTime = None
 notify = Notify()
 doneIds = {}
-stadtList = db.returnStadte(conn)
+stadtList = ['345']
 settings = get_project_settings()
 settings['LOG_FILE'] = 'Log_' + datetime.now().strftime("%Y-%m-%d") + '.log'
 settings['LOG_LEVEL'] = 'WARNING'
 process = CrawlerProcess(settings)
 notify = Notify()
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
+immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse"]
+ 
+nodes = [ 'http://immorobo-5.herokuapp.com:80/schedule.json', 
+        'http://immorobo-6.herokuapp.com:80/schedule.json', 'http://immorobo-7.herokuapp.com:80/schedule.json',
+        'http://immorobo-8.herokuapp.com:80/schedule.json','http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
+        'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
+        'http://immorobo-4.herokuapp.com:80/schedule.json' 'http://immorobo-9.herokuapp.com:80/schedule.json']
 # A callback that unpacks and prints the results of a DeferredList
 
-
 def printResult(result, stadtid, timebeforeCrawl):
-    print("ENDE CRALER %s  MIT STADTID %s  : " %
-                    (str(stadtid), str(currentTime)))
-    global stadtCounter
-    notify.showBenachrichtung(stadtid, timebeforeCrawl)
+    # print("ENDE CRALER %s  MIT STADTID %s  : " %
+    #                 (str(stadtid), str(currentTime)))
+    # global stadtCounter
+    # notify.showBenachrichtung(stadtid, timebeforeCrawl)
 
-    print(str(stadtid) + " WURDE NOTIFIED")
-    killChromies()
+    # print(str(stadtid) + " WURDE NOTIFIED")
+    # killChromies()
     _crawl()
 
 
@@ -111,29 +117,37 @@ def crash(failure):
 
 def _crawl():
 
-    global stadtList
-    if stadtList is None:
-        return
-    if stadtList:
-        row = stadtList.pop()
-       # print('RUNNER: mache ' + str(row))
-    else:
-        print('ALLE ABGEARBEITET STOPPE NUN')
-        process.stop()
-        
-        
-    currentTime = datetime.now()
+    global stadtList, stadtCounter
+    for entry in stadtList:
 
-    print("STARTE CRALER:STARTPUNKT : " + str(currentTime))
-    immo = process.crawl(ImmoSpider, kritId=row.get('Kritid'))
-    net = process.crawl(ImmonetSpider, kritId=row.get('Kritid'))
-    meinestadt = process.crawl(MeineStadtSpider, kritId=row.get('Kritid'))
-    sparkasse = process.crawl(SparkasseSpider, userToStadt=row)
+        node = nodes[stadtCounter]
+        stadtCounter += 1
+        if stadtCounter > 4:
+            stadtCounter = 0
+            time.sleep(60 * 2)  
+        stadtid = entry      
+        data = {
+            'project' : 'default',
+            'spider' : 'immonet',
+            'setting' : 'CLOSESPIDER_PAGECOUNT=10',
+            'setting' : 'CLOSESPIDER_TIMEOUT=60',
+            'stadtId' : stadtid
+        }
+
+        # for anbieter in immoAnbieter:
+        #     data['spider'] = anbieter
+        #     #print(data)
+        #     response = requests.post(node, data=data)
+        #     print(response.text)
+            
+    immo = process.crawl(ImmoSpider, stadtId=stadtid)
+    # net = process.crawl(ImmonetSpider, kritId=row.get('Kritid'))
+    # meinestadt = process.crawl(MeineStadtSpider, kritId=row.get('Kritid'))
+    # sparkasse = process.crawl(SparkasseSpider, userToStadt=row)
 
     dl = defer.DeferredList(
-        [ immo, net], consumeErrors=True)
-    dl.addCallback(printResult, stadtid=row.get(
-        'Stadtid'), timebeforeCrawl=currentTime)
+        [ immo], consumeErrors=True)
+    dl.addCallback(printResult, stadtid=stadtid, timebeforeCrawl=currentTime)
     dl.addErrback(oneKeyboardInterruptHandler)
     dl.addErrback(crash)  # <-- add errback here
 
@@ -141,6 +155,8 @@ def _crawl():
 
 
 
-print("CRAWLER FANGT AN: ")
+print("STARTE CRAWLER : " + str(datetime.now()))
 _crawl()
+print("ENDE CRAWLER : " + str(datetime.now()) + ' HABE ' + str(len(stadtList)) + ' bearbeitet' )
+
 process.start()

@@ -13,4 +13,5 @@ fake_useragent
 scrapyd
 scrapyd-client 
 logparser
+selenium
 herokuify-scrapyd==1.0

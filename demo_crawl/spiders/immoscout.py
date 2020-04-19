@@ -37,14 +37,16 @@ class ImmoSpider(scrapy.Spider):
     extractor = None
     stadtname = None
 
-    def __init__(self, kritId, *args, **kwargs):
+    def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
-        self.conn = self.db.create_conn()
-        print('kritId ist ' + str(kritId))
-        self.userToStadt = self.db.findUrlsInKritCollection(kritId)
+        # self.conn = self.db.create_conn()
+        print('stadtid ist ' + str(stadtId))
+        self.userToStadt = self.db.findStadtUrls(stadtId)
         if not self.userToStadt:
             print('USERTOSTADT IST NULL')
             return
+        else:
+            print('bearbeite ', self.userToStadt)
         self.extractor = ExtractViertel()
         self.extractor.init()
         super(ImmoSpider, self).__init__(*args, **kwargs)
@@ -52,6 +54,7 @@ class ImmoSpider(scrapy.Spider):
     def start_requests(self):
 
         try:
+            print('inside start_requests')
             self.Kaufen = self.userToStadt["kaufen"]
             self.Haus = self.userToStadt["haus"]
             self.stadtid = self.userToStadt["stadtid"]
@@ -125,16 +128,17 @@ class ImmoSpider(scrapy.Spider):
                     'url', "//link[@rel='canonical']/@href")
 
             loader.load_item()
-
+            images = []
             for i in range(1, 8):
                 try:
-                    bil = 'bild%s' % (str(i))
-                    xpath = '(//img[@class=\'sp-image \']/@data-src)[%s]' % (str(i))
-                    loader.add_xpath(bil, xpath)
+                    bild = response.xpath('(//img[@class=\'sp-image \']/@data-src)[%s]' % (str(i))).extract()
+                    images.append(bild)
                 except:
                     print("Fehler in Bild xpath Auslesen")
-
-            loader.load_item()
+            try:
+                item['images'] = images
+            except Exception as e:
+                logging.warning('fehler bei zuwesien von images to  item :' +str(e))
 
             loader.add_xpath(
                 'zimmer', "//dd[@class='is24qa-zimmer grid-item three-fifths']/text()")
@@ -212,17 +216,17 @@ class ImmoSpider(scrapy.Spider):
                 add = str(add) + ', ' + str(viertel)
                 loader.add_value('adresse', str(add).encode("utf-8"))
             
-            viertel = response.xpath('//ul[@class="breadcrumb__item--current"]/preceding::a[1]').get()
+            viertel = response.xpath('//ul[@class="breadcrumb__item--current"]/preceding::a[1]/text()').get()
 
             if viertel:
-                stadtvid = self.extractor.extractAdresse(
-                        self.conn, str(viertel), 99, self.stadtid)
-            if stadtvid == 0 and add:
-                stadtvid = self.extractor.extractAdresse(
-                    self.conn, str(add), 1, self.stadtid)
+                stadtvid = self.extractor.extractAdresse( str(viertel), 0)
                 loader.add_value('stadtvid', stadtvid)
-            else:
-                loader.add_value('stadtvid', 0)
+            # if stadtvid == 0 and add:
+            #     stadtvid = self.extractor.extractAdresse(
+            #         self.conn, str(add), 1, self.stadtid)
+            #     loader.add_value('stadtvid', stadtvid)
+            # else:
+            #     loader.add_value('stadtvid', 0)
 
             loader.add_value('stadtid', self.stadtid)
             loader.add_value('anbieter', "0")
@@ -240,4 +244,4 @@ class ImmoSpider(scrapy.Spider):
         str(spider.crawler.stats.get_value('item_scraped_count')))
         # self.db.writeScrapStatistik(
         #     self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
-        self.db.closeAllConnections(self.conn)
+        # self.db.closeAllConnections(self.conn)

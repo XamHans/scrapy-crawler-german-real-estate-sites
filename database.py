@@ -15,7 +15,7 @@ class DataBase:
     db = 'robo'
     connection = None
     mongo_immos = None
-    myclient = pymongo.MongoClient("mongodb://root:schranknr8@173.212.249.71:27017")
+    myclient = pymongo.MongoClient("mongodb://173.212.249.71:30001")
     mydb = myclient["immo_db"]
     mongo_immos = mydb["immos"] 
     
@@ -40,14 +40,35 @@ class DataBase:
             self.mydb['kriturls'].insert_one(dict(kritUrls))
         
         
-    def findUrlsInKritCollection(self, kritid):
+    def findStadtUrls(self, stadtid):
+        foundStadtUrls = self.mydb['stadturls'].find_one({'stadtid': int(stadtid)})
+        return foundStadtUrls
+    
+    def findStadt(self, stadtid):
+        foundStadt = self.mydb['stadte'].find_one({'id': int(stadtid)})
+        return foundStadt
+    
+    def findStadtViertel(self, viertel):
+        print('VIERTEL IST ' + str(viertel))
+        cursor = self.mydb['stadte'].aggregate([
+           { "$match" : {"Stadtviertel": viertel }},
+           { "$project": {  "index":
+                                 { 
+                                  "$indexOfArray": [ "$Stadtviertel", viertel ] 
+                                 }
+                         }
+            }
+        ])
+        result = list(cursor)
 
-        foundKritUrls = self.mydb['kriturls'].find_one({'kritid': int(kritid)})
-        # print(('found for kritid {} folgenden eintrag  {}').format(str(kritid), str(foundKritUrls)))
-        return foundKritUrls
+        print('STADTVIERTELINDEX IST ' + str(result))
+        if result and len(result) > 0:
+            print(result[0]['index'])
+            return result[0]['index']
+        else:
+            return None
 
     def checkIfInDupUrl(self, url):
-
         try:
                 # Create a new record
                 if "?" in str(url):
@@ -55,6 +76,13 @@ class DataBase:
                 if self.mongo_immos.count_documents({ 'url': url }, limit = 1) != 0: 
                     return True
                 return False
+        except Exception as e:
+            print(e)
+            return False
+        
+    def insertMongoImmos(self, jsonObject):
+        try:
+             self.mongo_immos.insert_one(jsonObject)
         except Exception as e:
             print(e)
             return False
@@ -79,7 +107,22 @@ class DataBase:
             print(e)
             cursor.close()
             return None
+            
+    def returnChangedKritids(self, conn):
+        try:
+            with conn.cursor() as cursor:
+                # Create a new record
 
+                sql = "SELECT  Kritid, Stadtid, ANY_VALUE(Stadt) as Stadt, ANY_VALUE(StadtViertel) as StadtViertel, MAX(CreatedAt) as CreatedAt, Haus,Kaufen FROM robo.KritView where Changed = 1 group by  Kritid order by CreatedAt asc"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                cursor.close()
+                return result
+        except Exception as e:
+            print(e)
+            cursor.close()
+            return None
+            
     def writeScrapStatistik(self, conn, anbieter, scrapCount):
         try:
             with conn.cursor() as cursor:

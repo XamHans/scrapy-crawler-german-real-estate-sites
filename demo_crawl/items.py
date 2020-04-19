@@ -165,7 +165,7 @@ class ImmobilieItem(scrapy.Item):
         booleanconverter, remove_whitespace), output_processor=TakeFirst())
     mobliert = scrapy.Field(input_processor=MapCompose(
         booleanconverter, remove_whitespace), output_processor=TakeFirst())
-
+    images = scrapy.Field()
     barriefrei = scrapy.Field(input_processor=MapCompose(
         booleanconverter, remove_whitespace), output_processor=TakeFirst())
     adresse = scrapy.Field(input_processor=MapCompose(
@@ -180,22 +180,7 @@ class ImmobilieItem(scrapy.Item):
         booleanconverter, remove_whitespace), output_processor=TakeFirst())
     url = scrapy.Field(input_processor=MapCompose(
         remove_tags), output_processor=TakeFirst())
-    bild1 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild2 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild3 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild4 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild5 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild6 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild7 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
-    bild8 = scrapy.Field(input_processor=MapCompose(
-        remove_tags), output_processor=TakeFirst())
+
     stadtid = scrapy.Field(input_processor=MapCompose(
         remove_whitespace), output_processor=TakeFirst())
     stadtvid = scrapy.Field(input_processor=MapCompose(

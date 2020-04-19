@@ -18,10 +18,9 @@ from ExtractViertel import ExtractViertel
 from database import DataBase
 import traceback
 import logging
-
+import uuid
 
 class MongoDbPipeline(object):
-    collection = 'immos'
 
     stopCondition = 0
     extractor = None
@@ -120,7 +119,7 @@ class MongoDbPipeline(object):
             self.mongo_uri = 'mongodb://root:schranknr8@173.212.249.71:27017'
             self.mongo_db = 'immo_db'
             self.mydb = DataBase()
-            self.conn = self.mydb.create_conn()
+            # self.conn = self.mydb.create_conn()
             self.extractor = ExtractViertel()
             self.extractor.init()
         except Exception as e:
@@ -140,6 +139,66 @@ class MongoDbPipeline(object):
             self.stopCondition = 0
         except Exception as e:
             print(e)
+            
+    def transformItem(self, item):
+        stadt = self.mydb.findStadt(item['stadtid'])
+        ausstattungArray = []
+        transObject = {
+            '_id': str(uuid.uuid4()),
+            'immobilienTypDaten': 
+                                {
+                                    'immoRentType': item['kaufen'],
+                                    'immoType': item['haus']
+                                },
+            'standortDaten':    
+                                {
+                                    'Stadt': stadt,
+                                    'strasse': item['adresse']
+                                },
+            'basisDaten':    
+                                {
+                                    'flache': item['flache'],
+                                    'zimmer': item['zimmer'],
+                                    'bezugsfreiab': item['bezugsfreiab'] if 'bezugsfreiab' in item else None
+                                },
+
+            'beschreibungDaten': 
+                                {
+                                    'title': item['title']
+                                },
+            'fotoDaten': 
+                                {
+                                    'images': item['images']
+                                },
+            'url': item['url'],
+            'anbieter': item['anbieter']
+        }
+        transObject['standortDaten']['Stadt']['Stadtviertel'] = []
+        if 'stadtvid' in item:
+            transObject['standortDaten']['Stadt']['Stadtviertel'] = {'index': item['stadtvid']}
+        if item['kaufen'] == 0:
+            transObject['mietDaten'] = { 'gesamtkosten': item['gesamtkosten']}
+        else:
+            transObject['kaufDaten'] = { 'kaufpreis': item['gesamtkosten']}
+            
+        if 'keller' in item:
+            ausstattungArray.append( {
+                '_id': 1,
+                'name': 'Keller'
+            }) 
+        if 'haustier' in item:
+            ausstattungArray.append( {
+                '_id': 2,
+                'name': 'Haustiere erlaubt'
+            }) 
+        if 'ebk' in item:
+            ausstattungArray.append( {
+                '_id': 3,
+                'name': 'Einbauküche'
+            }) 
+        if len(ausstattungArray) > 0:
+            transObject['ausstattungDaten'] = ausstattungArray
+        return transObject
 
     def process_item(self, item, spider):
         try:
@@ -166,7 +225,8 @@ class MongoDbPipeline(object):
                         addresseMitStadt = item['adresse'] + \
                             ', ' + item['stadtname']
 
-                    self.getLanLonMapQuest(addresseMitStadt, item)
+                    # self.getLanLonMapQuest(addresseMitStadt, item)
+                    
                 if 'lat' in item:
                     try:
                         self.ermittleStadtvidFromSuburb(item)
@@ -175,13 +235,15 @@ class MongoDbPipeline(object):
                 try:
                     if 'stadtname' in item:
                         del item['stadtname']
-   
-                    self.db[self.collection].insert_one(dict(item))
-                    #logging.warning('insert item :' +str(item))
+                    mongoStructureItem = self.transformItem(item)
+                    print( mongoStructureItem)
+                    self.mydb.insertMongoImmos(mongoStructureItem)
+                    logging.warning('insert item :' +str(item))
                 except Exception as e:
-                    #logging.warning(e)
-                    self.db[self.collection].update_one({"url": item['url']}, { "$set": {"alive": datetime.datetime.now().strftime(
-                    '%Y-%m-%d %H:%M:%S')} })
+                    print(e)
+                    logging.warning(e)
+                    # self.db[self.collection].update_one({"url": item['url']}, { "$set": {"alive": datetime.datetime.now().strftime(
+                    # '%Y-%m-%d %H:%M:%S')} })
                     self.stopCondition += 1
 
         except Exception as e:

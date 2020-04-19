@@ -2,3 +2,6 @@
 /project.egg-info
 /setup_backup.py
 /setup.py
+/demo_crawl/spiders/__pycache__/
+/demo_crawl/__pycache__/
+/__pycache__/

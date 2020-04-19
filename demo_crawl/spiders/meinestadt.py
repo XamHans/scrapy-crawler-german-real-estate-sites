@@ -44,10 +44,10 @@ class MeineStadtSpider(scrapy.Spider):
     extractor = None
     item = None
 
-    def __init__(self, kritId, *args, **kwargs):
+    def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
         self.conn = self.db.create_conn()
-        self.userToStadt = self.db.findUrlsInKritCollection(kritId)
+        self.userToStadt = self.db.findStadtUrls(stadtId)
         self.extractor = ExtractViertel()
         self.extractor.init()
         super(MeineStadtSpider, self).__init__(*args, **kwargs)
