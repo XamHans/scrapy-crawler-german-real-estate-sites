@@ -219,7 +219,7 @@ class ImmoSpider(scrapy.Spider):
             viertel = response.xpath('//ul[@class="breadcrumb__item--current"]/preceding::a[1]/text()').get()
 
             if viertel:
-                stadtvid = self.extractor.extractAdresse( str(viertel), 0)
+                stadtvid = self.extractor.extractAdresse( str(viertel), 0, self.stadtid)
                 loader.add_value('stadtvid', stadtvid)
             # if stadtvid == 0 and add:
             #     stadtvid = self.extractor.extractAdresse(

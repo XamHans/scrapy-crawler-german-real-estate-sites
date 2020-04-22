@@ -47,7 +47,7 @@ class ImmonetSpider(scrapy.Spider):
 
     def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
-        self.conn = self.db.create_conn()
+        # self.conn = self.db.create_conn()
         self.userToStadt = self.db.findStadtUrls(stadtId)
         self.extractor = ExtractViertel()
         self.extractor.init()
@@ -144,18 +144,19 @@ class ImmonetSpider(scrapy.Spider):
                 loader.add_xpath('garage', "1")
             loader.add_value(
                 'url', response.url)
-
+            images = []
             for i in range(1, 8):
                 try:
-                    bil = 'bild%s' % (str(i))
+                    # bil = 'bild%s' % (str(i))
                     xpath = '//div[@class="fotorama "]/div[%s]/@data-full' % (
                         str(i))
                     bildUrl = response.xpath(xpath).get()
-                    loader.add_xpath(bil, xpath)
+                    images.append(bildUrl)
                 except Exception as e:
                     traceback.print_exception(type(e), e, e.__traceback__)
                     print("Fehler in Bild xpath Auslesen")
 
+            item['images'] = images
             loader.add_xpath(
                 'zimmer', "//div[@id='equipmentid_1']/text()")
 
@@ -277,7 +278,7 @@ class ImmonetSpider(scrapy.Spider):
             ortsviertel = response.meta["ortsviertel"]
             if ortsviertel and str(ortsviertel).isalpha():
                 stadtvid = self.extractor.extractAdresse(
-                    self.conn, str(ortsviertel), 2, self.stadtid)
+                str(ortsviertel), 2, self.stadtid)
                 if stadtvid and stadtvid != 0:
                     loader.add_value('stadtvid', stadtvid)
 
@@ -298,6 +299,6 @@ class ImmonetSpider(scrapy.Spider):
        # self.db.setScrapedTime(self.conn, self.id)
         print("IMMONET scraped :" + str(spider.crawler.stats.get_value(
             'item_scraped_count')) + " IN DER STADT : " + str(self.stadtname))
-        self.db.writeScrapStatistik(
-            self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
-        self.db.closeAllConnections(self.conn)
+        # self.db.writeScrapStatistik(
+        #     self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
+        # self.db.closeAllConnections(self.conn)

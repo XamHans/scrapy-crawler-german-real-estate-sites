@@ -140,13 +140,13 @@ def _crawl():
         #     response = requests.post(node, data=data)
         #     print(response.text)
             
-    immo = process.crawl(ImmoSpider, stadtId=stadtid)
-    # net = process.crawl(ImmonetSpider, kritId=row.get('Kritid'))
-    # meinestadt = process.crawl(MeineStadtSpider, kritId=row.get('Kritid'))
-    # sparkasse = process.crawl(SparkasseSpider, userToStadt=row)
+    # immo = process.crawl(ImmoSpider, stadtId=stadtid)
+    # net = process.crawl(ImmonetSpider, stadtId=stadtid)
+    meinestadt = process.crawl(MeineStadtSpider,stadtId=stadtid)
+    # sparkasse = process.crawl(SparkasseSpider, stadtId=stadtid)
 
     dl = defer.DeferredList(
-        [ immo], consumeErrors=True)
+        [  meinestadt], consumeErrors=True)
     dl.addCallback(printResult, stadtid=stadtid, timebeforeCrawl=currentTime)
     dl.addErrback(oneKeyboardInterruptHandler)
     dl.addErrback(crash)  # <-- add errback here

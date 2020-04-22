@@ -46,7 +46,7 @@ class MeineStadtSpider(scrapy.Spider):
 
     def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
-        self.conn = self.db.create_conn()
+        # self.conn = self.db.create_conn()
         self.userToStadt = self.db.findStadtUrls(stadtId)
         self.extractor = ExtractViertel()
         self.extractor.init()
@@ -91,6 +91,7 @@ class MeineStadtSpider(scrapy.Spider):
                     self.item, selector=response, response=response)
                 self.item["title"] = jsonitem["title"]
                 self.item["url"] = jsonitem["detailUrl"]
+
                 self.item["zimmer"] = jsonitem["rooms"]
                 self.item["flache"] = jsonitem["livingAreaRaw"]
                 self.item["lat"] = jsonitem["latitude"]
@@ -134,7 +135,7 @@ class MeineStadtSpider(scrapy.Spider):
                 loader.add_value('haus', self.Haus)
                 loader.load_item()
                 yield scrapy.Request(
-                    jsonitem["detailUrl"], callback=self.parse_images)
+                    jsonitem["detailUrl"], callback=self.parse_images, meta={"item": self.item})
 
             except Exception as ex:
                 print('meinestadt error parse')
@@ -142,21 +143,22 @@ class MeineStadtSpider(scrapy.Spider):
 
     def parse_images(self, response):
         try:
-            loader = ItemLoader(self.item, selector=response, response=response)
-
-            self.item['adresse'] = str(response.xpath(
-                "//div[ contains(@class, 'location')]/text()").get()).strip()
-            if not self.item['adresse']:
-                self.item['adresse'] = response.xpath(
-                    '//div[@class="a-resultListMetainfoItem__text "]/text()').get()
-            loader.add_xpath('bezugsfreiab',
-                             "//div[@class='section_content'][2]/p/text()")
+            transItem = response.meta["item"]
+            loader = ItemLoader(transItem, selector=response, response=response)
+            if 'adresse' not in transItem:
+                transItem['adresse'] = str(response.xpath(
+                    "//div[ contains(@class, 'location')]/text()").get()).strip()
+                if not transItem['adresse']:
+                    transItem['adresse'] = response.xpath(
+                        '//div[@class="a-resultListMetainfoItem__text "]/text()').get()
+                loader.add_xpath('bezugsfreiab',
+                                "//div[@class='section_content'][2]/p/text()")
 
             stadtvid = 0
-            if self.item['adresse']:
-                stadtvid = self.extractor.extractAdresse(
-                    self.conn, str(self.item['adresse']), 1, self.stadtid)
-            self.item['stadtvid'] = stadtvid
+            # if self.item['adresse']:
+            #     stadtvid = self.extractor.extractAdresse(
+            #          str(self.item['adresse']), 1, self.stadtid)
+            # self.item['stadtvid'] = stadtvid
 
             bilder = response.xpath(
                 "//div[ contains(@class,'m-gallery__imageContainer')]/img[contains(@class,'ImageNormal')]/@data-flickity-lazyload-src").getall()
@@ -164,20 +166,19 @@ class MeineStadtSpider(scrapy.Spider):
                 bilder = response.xpath(
                     "//meta[ contains(@content, 'https://media-pics2.immowelt.org/')]/@content").getall()
             x = 1
+            images = []
 
             for i in bilder:
                 try:
-                    bil = 'bild%s' % (str(x))
-                    x += 1
-                    if x == 9:
-                        break
-                    self.item[bil] = i
-
+                    images.append(i)
                 except Exception as e:
                     traceback.print_exception(type(e), e, e.__traceback__)
                     print("Fehler in Bild xpath Auslesen")
             try:
+                transItem['images']=images
+                print('load item ' + str(transItem))
                 yield loader.load_item()
+
             except Exception as e:
                 print(e)
 
@@ -189,6 +190,6 @@ class MeineStadtSpider(scrapy.Spider):
 
         print("MEINE STADT scraped :" + str(spider.crawler.stats.get_value(
             'item_scraped_count')) + " IN DER STADT : " + str(self.stadtname))
-        self.db.writeScrapStatistik(
-            self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
-        self.db.closeAllConnections(self.conn)
+        # self.db.writeScrapStatistik(
+        #     self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
+        # self.db.closeAllConnections(self.conn)

@@ -10,7 +10,7 @@ class ExtractViertel:
     def init(self):
         self.db = DataBase()
 
-    def extractAdresse(self, viertel, anbieter):
+    def extractAdresse(self, viertel, anbieter, stadtid):
 
      
 
@@ -31,7 +31,7 @@ class ExtractViertel:
         #         return "0"
             
         if  viertel is not None and len(viertel) != 0:
-            stadtviertelIndex = self.db.findStadtViertel(viertel)
+            stadtviertelIndex = self.db.findStadtViertel(viertel, stadtid)
             
         if stadtviertelIndex:
             return stadtviertelIndex

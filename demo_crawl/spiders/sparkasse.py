@@ -22,16 +22,20 @@ class SparkasseSpider(scrapy.Spider):
     name = 'sparkasse'
     stadtid = 0
     x = 0
-    id = 0
     conn = None
     stadtname = ""
     userToStadt = None
     extractor = None
 
-    def __init__(self, userToStadt, *args, **kwargs):
+    def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
-        self.conn = self.db.create_conn()
-        self.userToStadt = userToStadt
+        # self.conn = self.db.create_conn()
+        self.userToStadt = self.db.findStadtUrls(stadtId)
+        if not self.userToStadt:
+            print('USERTOSTADT IST NULL')
+            return
+        else:
+            print('SPARKSSE MACHT ', self.userToStadt)
         self.extractor = ExtractViertel()
         self.extractor.init()
 
@@ -39,13 +43,12 @@ class SparkasseSpider(scrapy.Spider):
 
     def start_requests(self):
 
-        self.Kaufen = self.userToStadt.get("Kaufen")
-        self.Haus = self.userToStadt.get("Haus")
-        self.stadtid = self.userToStadt.get("Stadtid")
-        self.stadtname = self.userToStadt.get("Stadt")
-        self.id = self.userToStadt.get('Id')
+        self.Kaufen = self.userToStadt.get("kaufen")
+        self.Haus = self.userToStadt.get("haus")
+        self.stadtid = self.userToStadt.get("stadtid")
+        self.stadtname = self.userToStadt.get("stadtname")
 
-        if self.userToStadt.get('Kaufen') == 0:
+        if self.userToStadt.get('kaufen') == 0:
             return
 
         url = "https://immobilien.sparkasse.de/api/estate/?filterOptions=%7B%22page%22:1,%22zip_city_estate_id%22:%22" + self.stadtname + \
@@ -163,7 +166,7 @@ class SparkasseSpider(scrapy.Spider):
             stadtviertel = nominatimresp["address"]["suburb"]
             #print("STADTVIERTEL GEFUNDEN ALS: " + stadtviertel)
             stadtvid = self.extractor.extractAdresse(
-                self.conn, str(nominatimresp["address"]["road"]), 99, self.stadtid)
+                 str(nominatimresp["address"]["road"]), 99, self.stadtid)
             item['stadtvid'] = stadtvid
             item["adresse"] = nominatimresp["address"]["road"]
         item["lat"] = lat
@@ -176,9 +179,9 @@ class SparkasseSpider(scrapy.Spider):
     def spider_closed(self, spider, reason):
         print("SPIDER SPARKASSE " + self.stadtname +
                         "  CLOSED" + " REASON : " + reason)
-        self.db.setScrapedTime(self.conn, self.id)
+        # self.db.setScrapedTime(self.conn, self.id)
         print(
             " scraped " + str(spider.crawler.stats.get_value('item_scraped_count')))
-        self.db.writeScrapStatistik(
-            self.conn, 3, spider.crawler.stats.get_value('item_scraped_count'))
-        self.db.closeAllConnections(self.conn)
+        # self.db.writeScrapStatistik(
+        #     self.conn, 3, spider.crawler.stats.get_value('item_scraped_count'))
+        # self.db.closeAllConnections(self.conn)

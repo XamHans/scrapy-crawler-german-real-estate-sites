@@ -48,10 +48,10 @@ class DataBase:
         foundStadt = self.mydb['stadte'].find_one({'id': int(stadtid)})
         return foundStadt
     
-    def findStadtViertel(self, viertel):
+    def findStadtViertel(self, viertel, stadtid):
         print('VIERTEL IST ' + str(viertel))
         cursor = self.mydb['stadte'].aggregate([
-           { "$match" : {"Stadtviertel": viertel }},
+           { "$match" : {"id": stadtid }},
            { "$project": {  "index":
                                  { 
                                   "$indexOfArray": [ "$Stadtviertel", viertel ] 
@@ -62,7 +62,7 @@ class DataBase:
         result = list(cursor)
 
         print('STADTVIERTELINDEX IST ' + str(result))
-        if result and len(result) > 0:
+        if result and result[0]['index'] >= 0:
             print(result[0]['index'])
             return result[0]['index']
         else:
@@ -180,30 +180,29 @@ class DataBase:
         return result
         
 
-    def returnStadtVidFromViertel(self, conn, sql):
-        try:
-            with conn.cursor() as cursor:
-                # Create a new record
-                cursor.execute(sql)
-                result = cursor.fetchone()
-                cursor.close()
-                if result:
-                    return result.get('id')
-                else:
-                    return 0
-                '''if result == None:      Wenn du neue anlegen möchtest :)
-                    print("StadtViertel existiert nicht, lege neues an")
-                    sql = "INSERT INTO StadtViertel (StadtViertel, Stadtid) VALUES ('%s' , %s) " % (
-                        Stadtviertel, stadtid)
-                    cursor.execute(sql)
-                    conn.commit()
-                    returnStadtIdFromViertel(Stadtviertel, stadtid)
-                    cursor.close()'''
-        except Exception as e:
-            logging.warning(
-                'Fehler in returnStadtVidFromViertel in sql ' + str(sql))
-            cursor.close()
-            return 0
+    # def returnStadtVidFromViertel(self, conn, sql):
+    #     try:
+    #         with conn.cursor() as cursor:
+    #             # Create a new record
+    #             cursor.execute(sql)
+    #             result = cursor.fetchone()
+    #             cursor.close()
+    #             if result:
+    #                 return result.get('id')
+    #             else:
+    #                 return 0
+    #             '''if result == None:      Wenn du neue anlegen möchtest :)
+    #                 print("StadtViertel existiert nicht, lege neues an")
+    #                 sql = "INSERT INTO StadtViertel (StadtViertel, Stadtid) VALUES ('%s' , %s) " % (
+    #                     Stadtviertel, stadtid)
+    #                 cursor.execute(sql)
+    #                 conn.commit()
+    #                 returnStadtIdFromViertel(Stadtviertel, stadtid)
+    #                 cursor.close()'''
+    #     except Exception as e:
+    #         logging.warning(
+    #             'Fehler in returnStadtVidFromViertel in sql ' + str(sql))
+    #         cursor.close()
 
     def deleteUrl(self, url):        
         try:
