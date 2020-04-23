@@ -30,14 +30,14 @@ def get_driver():
     chromeOptions = webdriver.ChromeOptions()
     prefs = {"profile.managed_default_content_settings.images": 2}
     chromeOptions.add_argument('--no-sandbox')
-    chromeOptions.add_argument('--headless')
+    # chromeOptions.add_argument('--headless')
     chromeOptions.add_argument('--disable-dev-shm-usage')
     # chromeOptions.add_argument('--proxy-server=http://{}'.format('173.212.249.71:8118'))
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "eager"  # complete
     chromeOptions.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(
-        chrome_options=chromeOptions, desired_capabilities=caps, executable_path='/usr/local/bin/chromedriver')
+        chrome_options=chromeOptions, desired_capabilities=caps, executable_path='./chromedriver.exe')
     setattr(threadLocal, 'driver', driver)
   return driver
 
@@ -250,13 +250,13 @@ def doMeineStadt(url, userToStadt, saver):
     
 if __name__ == '__main__':
     db = DataBase()
-    conn = db.create_conn()
-    stadtList = db.returnChangedKritids(conn)
+    # conn = db.create_conn()
+    stadtList = db.returnChangedKritids()
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
     for item in range(len(stadtList)):
         userToStadt = stadtList.pop()
-        kritUrls['kritid'] = userToStadt.get('Kritid')
+        # kritUrls['kritid'] = userToStadt.get('Kritid')
         kritUrls['haus'] = userToStadt.get('Haus')
         kritUrls['kaufen'] = userToStadt.get('Kaufen')
         kritUrls['stadtid'] = userToStadt.get('Stadtid')
@@ -280,7 +280,7 @@ if __name__ == '__main__':
         print('ALLE FERTIG Kriturls ist ' + str(kritUrls) )
 
         db.insertUrlsForKrit(kritUrls)
-        db.setChangedToKrit(conn, userToStadt.get('Kritid'))
+        # db.setChangedToKrit(conn, userToStadt.get('Kritid'))
         kritUrls.clear()
         return_dict.clear()
         killChromies()

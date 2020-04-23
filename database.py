@@ -35,10 +35,10 @@ class DataBase:
             conn.close()
 
     def insertUrlsForKrit(self, kritUrls):
-        if self.mydb["kriturls"].count_documents({ 'kritid': kritUrls['kritid'] }, limit = 1) == 0: 
-            print('bisher kein eintrag adde kritUrls')
-            self.mydb['kriturls'].insert_one(dict(kritUrls))
-        
+        try:
+             self.mydb['stadturls'].insert_one(dict(kritUrls))
+        except Exception as e:
+            print(e)
         
     def findStadtUrls(self, stadtid):
         foundStadtUrls = self.mydb['stadturls'].find_one({'stadtid': int(stadtid)})
@@ -108,20 +108,21 @@ class DataBase:
             cursor.close()
             return None
             
-    def returnChangedKritids(self, conn):
-        try:
-            with conn.cursor() as cursor:
-                # Create a new record
-
-                sql = "SELECT  Kritid, Stadtid, ANY_VALUE(Stadt) as Stadt, ANY_VALUE(StadtViertel) as StadtViertel, MAX(CreatedAt) as CreatedAt, Haus,Kaufen FROM robo.KritView where Changed = 1 group by  Kritid order by CreatedAt asc"
-                cursor.execute(sql)
-                result = cursor.fetchall()
-                cursor.close()
-                return result
-        except Exception as e:
-            print(e)
-            cursor.close()
-            return None
+    def returnChangedKritids(self):
+        toDoStadte = []
+        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 345, 'Stadt': 'Regensburg' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 4332, 'Stadt': 'München' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 4332, 'Stadt': 'München' })
+        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 4332, 'Stadt': 'München' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 128, 'Stadt': 'Berlin' })
+        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 128, 'Stadt': 'Berlin' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 128, 'Stadt': 'Berlin' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 415, 'Stadt': 'Köln' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 415, 'Stadt': 'Köln' })
+        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 702, 'Stadt': 'Hamburg' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 702, 'Stadt': 'Hamburg' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 702, 'Stadt': 'Hamburg' })
+        return toDoStadte
             
     def writeScrapStatistik(self, conn, anbieter, scrapCount):
         try:
