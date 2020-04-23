@@ -148,7 +148,8 @@ def doImmoNet(url, userToStadt, saver):
                 
         input = wait.until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, "#location")))
-        
+        input.click()
+        time.sleep(1)
         input.send_keys(stadtname)
         time.sleep(1)
         input.send_keys(Keys.RETURN)

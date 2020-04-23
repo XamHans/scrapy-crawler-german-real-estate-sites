@@ -42,9 +42,7 @@ notify = Notify()
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse"]
  
-nodes = [ 'http://immorobo-5.herokuapp.com:80/schedule.json', 
-        'http://immorobo-6.herokuapp.com:80/schedule.json', 'http://immorobo-7.herokuapp.com:80/schedule.json',
-        'http://immorobo-8.herokuapp.com:80/schedule.json','http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
+nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
         'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
         'http://immorobo-4.herokuapp.com:80/schedule.json' ]
 # A callback that unpacks and prints the results of a DeferredList
