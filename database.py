@@ -6,6 +6,7 @@ import traceback
 import logging
 from pymongo import MongoClient
 import pymongo
+from bson.objectid import ObjectId
 
 class DataBase:
 
@@ -41,7 +42,7 @@ class DataBase:
             print(e)
         
     def findStadtUrls(self, stadtid):
-        foundStadtUrls = self.mydb['stadturls'].find_one({'_id': stadtid})
+        foundStadtUrls = self.mydb['stadturls'].find_one({'_id': ObjectId(stadtid)})
         return foundStadtUrls
     
     def findAllStadtUrl(self):

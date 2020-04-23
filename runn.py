@@ -40,7 +40,7 @@ settings['LOG_LEVEL'] = 'WARNING'
 process = CrawlerProcess(settings)
 notify = Notify()
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse"]
+immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
  
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
         'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
@@ -120,12 +120,13 @@ def _crawl():
     for entry in stadtList:
 
         node = nodes[stadtCounter]
-        print('NODE '+ node + ' MACHT ENTRY '+ str(entry['_id']))
+        print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
         stadtCounter += 1
-        if stadtCounter > 8:
+        if stadtCounter >= 4:
             stadtCounter = 0
             time.sleep(60 * 2)  
-        stadtid = entry['_id']      
+        stadtid = entry['_id'] 
+    
         data = {
             'project' : 'default',
             'spider' : 'immonet',
@@ -136,27 +137,26 @@ def _crawl():
 
         for anbieter in immoAnbieter:
             data['spider'] = anbieter
-            print(data)
-            # response = requests.post(node, data=data)
-            # print(response.text)
-            
-    # # immo = process.crawl(ImmoSpider, stadtId=stadtid)
-    # # net = process.crawl(ImmonetSpider, stadtId=stadtid)
-    # meinestadt = process.crawl(MeineStadtSpider,stadtId=stadtid)
-    # # sparkasse = process.crawl(SparkasseSpider, stadtId=stadtid)
+            # print(data)
+            response = requests.post(node, data=data)
+            print(response.text)
+        # immo = process.crawl(ImmoSpider, stadtId=stadtid)
+        # net = process.crawl(ImmonetSpider, stadtId=stadtid)
+        # meinestadt = process.crawl(MeineStadtSpider,stadtId=stadtid)
+        # sparkasse = process.crawl(SparkasseSpider, stadtId=stadtid)
 
-    # dl = defer.DeferredList(
-    #     [  meinestadt], consumeErrors=True)
-    # dl.addCallback(printResult, stadtid=stadtid, timebeforeCrawl=currentTime)
-    # dl.addErrback(oneKeyboardInterruptHandler)
-    # dl.addErrback(crash)  # <-- add errback here
+        # dl = defer.DeferredList(
+        #     [ immo, net, meinestadt], consumeErrors=True)
+        # dl.addCallback(printResult, stadtid=stadtid, timebeforeCrawl=currentTime)
+        # dl.addErrback(oneKeyboardInterruptHandler)
+        # dl.addErrback(crash)  # <-- add errback here
 
-    # return dl
+        # return dl
 
 
 
 print("STARTE CRAWLER : " + str(datetime.now()))
 _crawl()
-print("ENDE CRAWLER : " + str(datetime.now()) + ' HABE ' + str(len(stadtList)) + ' bearbeitet' )
+print("ENDE CRAWLER : " + str(datetime.now())  )
 
-# process.start()
+process.start()
