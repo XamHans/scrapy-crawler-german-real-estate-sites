@@ -41,7 +41,11 @@ class DataBase:
             print(e)
         
     def findStadtUrls(self, stadtid):
-        foundStadtUrls = self.mydb['stadturls'].find_one({'stadtid': int(stadtid)})
+        foundStadtUrls = self.mydb['stadturls'].find_one({'_id': stadtid})
+        return foundStadtUrls
+    
+    def findAllStadtUrl(self):
+        foundStadtUrls = self.mydb['stadturls'].find()
         return foundStadtUrls
     
     def findStadt(self, stadtid):
