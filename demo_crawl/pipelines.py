@@ -189,6 +189,46 @@ class MongoDbPipeline(object):
                 '_id': 3,
                 'name': 'Einbauküche'
             }) 
+        if 'provisionsfrei' in item:
+            ausstattungArray.append( {
+                '_id': 9,
+                'name': 'Provisionsfrei'
+            }) 
+        if 'garage' in item:
+            ausstattungArray.append( {
+                '_id': 4,
+                'name': 'Garage'
+            }) 
+        if 'terrasse' in item:
+            ausstattungArray.append( {
+                '_id': 5,
+                'name': 'Terrasse'
+            }) 
+        if 'garten' in item:
+            ausstattungArray.append( {
+                '_id': 10,
+                'name': 'Garten'
+            }) 
+        if 'balkon' in item:
+            ausstattungArray.append( {
+                '_id': 6,
+                'name': 'Balkon'
+            }) 
+        if 'aufzug' in item:
+            ausstattungArray.append( {
+                '_id': 7,
+                'name': 'Aufzug'
+            }) 
+        if 'mobliert' in item:
+            ausstattungArray.append( {
+                '_id': 11,
+                'name': 'Möbliert'
+            }) 
+        if 'barriefrei' in item:
+            ausstattungArray.append( {
+                '_id': 8,
+                'name': 'Barrierefrei'
+            }) 
         if len(ausstattungArray) > 0:
             transObject['ausstattungDaten'] = ausstattungArray
         return transObject
