@@ -40,6 +40,11 @@ class DataBase:
              self.mydb['stadturls'].insert_one(dict(kritUrls))
         except Exception as e:
             print(e)
+            
+    def deletEentryBeforeCrawl(self, entry):
+        self.mydb['immos'].delete_many({ 'standortDaten.Stadt.id' : entry['stadtid'],
+                                        'immobilienTypDaten.immoRentType': entry['kaufen'],
+                                         'immobilienTypDaten.immoType': entry['haus'] })
         
     def findStadtUrls(self, stadtid):
         foundStadtUrls = self.mydb['stadturls'].find_one({'_id': ObjectId(stadtid)})

@@ -126,6 +126,7 @@ def _crawl():
     for entry in stadtList:
 
         node = nodes[stadtCounter]
+        db.deletEentryBeforeCrawl(entry)
         print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
         stadtCounter += 1
         if stadtCounter >= 4:
@@ -137,7 +138,7 @@ def _crawl():
             'project' : 'default',
             'spider' : 'immonet',
             'setting' : 'CLOSESPIDER_PAGECOUNT=10',
-            'setting' : 'CLOSESPIDER_TIMEOUT=60',
+            'setting' : 'CLOSESPIDER_TIMEOUT=120',
             'stadtId' : stadtid
         }
 
