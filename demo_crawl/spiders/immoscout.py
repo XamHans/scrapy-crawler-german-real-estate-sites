@@ -132,6 +132,8 @@ class ImmoSpider(scrapy.Spider):
             for i in range(1, 8):
                 try:
                     bild = response.xpath('(//img[@class=\'sp-image \']/@data-src)[%s]' % (str(i))).extract()
+                    if not bild:
+                        break
                     images.append(bild)
                 except:
                     print("Fehler in Bild xpath Auslesen")
@@ -170,7 +172,7 @@ class ImmoSpider(scrapy.Spider):
             else:
                 loader.add_value('kaufen', '1')
                 loader.add_xpath(
-                    'gesamtkosten', "//div[@class='is24qa-kaufpreis is24-value font-semibold']/text()")
+                    'gesamtkosten', "//div[@class='is24qa-kaufpreis is24-value font-semibold is24-preis-value']/text()")
                 loader.add_xpath(
                     'flache', "//dd[@class='is24qa-wohnflaeche-ca grid-item three-fifths']/text()")
                 loader.add_xpath(

@@ -170,6 +170,8 @@ class MeineStadtSpider(scrapy.Spider):
 
             for i in bilder:
                 try:
+                    if not i:
+                        break
                     images.append(i)
                 except Exception as e:
                     traceback.print_exception(type(e), e, e.__traceback__)

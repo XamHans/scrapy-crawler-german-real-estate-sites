@@ -151,6 +151,8 @@ class ImmonetSpider(scrapy.Spider):
                     xpath = '//div[@class="fotorama "]/div[%s]/@data-full' % (
                         str(i))
                     bildUrl = response.xpath(xpath).get()
+                    if not bildUrl:
+                        break
                     images.append(bildUrl)
                 except Exception as e:
                     traceback.print_exception(type(e), e, e.__traceback__)
