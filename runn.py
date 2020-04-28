@@ -5,25 +5,11 @@ from database import DataBase
 from scrapy.utils.project import get_project_settings
 import scrapy.crawler as crawler
 from scrapy.crawler import CrawlerProcess
-from twisted.internet import reactor
 from datetime import datetime
-from Notify import Notify
 import time
 from datetime import timedelta
-import psutil
-from twisted.internet import reactor, defer
-from twisted.internet.task import deferLater
-from twisted.internet.protocol import ProcessProtocol
-from demo_crawl.spiders.immoscout import ImmoSpider
-from demo_crawl.spiders.immonet import ImmonetSpider
-from demo_crawl.spiders.sparkasse import SparkasseSpider
-from demo_crawl.spiders.meinestadt import MeineStadtSpider
-from demo_crawl.spiders.checkStadt import CheckStadtSpider
 import logging
 from scrapy.utils.log import configure_logging
-import sys
-import subprocess
-from sys import exit
 import requests
 import json
 settings = get_project_settings()
@@ -31,15 +17,12 @@ stadtCounter = 0
 db = DataBase()
 # conn = db.create_conn()
 currentTime = None
-notify = Notify()
-doneIds = {}
 stadtList = db.findAllStadtUrl()
 settings = get_project_settings()
 settings['LOG_FILE'] = 'Log_' + datetime.now().strftime("%Y-%m-%d") + '.log'
 settings['LOG_LEVEL'] = 'WARNING'
 process = CrawlerProcess(settings)
-notify = Notify()
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
 immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
  
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
@@ -129,8 +112,9 @@ def _crawl():
         db.deletEentryBeforeCrawl(entry)
         print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
         stadtCounter += 1
-        if stadtCounter >= 4:
+        if stadtCounter > 9:
             stadtCounter = 0
+            print('MACHE PAUSE')
             time.sleep(60 * 2)  
         stadtid = entry['_id'] 
     
@@ -138,7 +122,7 @@ def _crawl():
             'project' : 'default',
             'spider' : 'immonet',
             'setting' : 'CLOSESPIDER_PAGECOUNT=10',
-            'setting' : 'CLOSESPIDER_TIMEOUT=120',
+            'setting' : 'CLOSESPIDER_TIMEOUT=60',
             'stadtId' : stadtid
         }
 

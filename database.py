@@ -42,7 +42,8 @@ class DataBase:
             print(e)
             
     def deletEentryBeforeCrawl(self, entry):
-        self.mydb['immos'].delete_many({ 'standortDaten.Stadt.id' : entry['stadtid'],
+        self.mydb['immos'].delete_many({  'anbieter': { "$exists": True},
+                                        'standortDaten.Stadt.id' : entry['stadtid'],
                                         'immobilienTypDaten.immoRentType': entry['kaufen'],
                                          'immobilienTypDaten.immoType': entry['haus'] })
         
