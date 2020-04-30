@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import pymysql
 import time
 import traceback
 import logging
 from pymongo import MongoClient
 import pymongo
 from bson.objectid import ObjectId
+from datetime import datetime
 
 class DataBase:
 
@@ -19,33 +19,25 @@ class DataBase:
     myclient = pymongo.MongoClient("mongodb://173.212.249.71:30001")
     mydb = myclient["immo_db"]
     mongo_immos = mydb["immos"] 
-    
-    def create_conn(self):
-        return pymysql.connect(host=self.host,
-                               user=self.user,
-                               password=self.password,
-                               db=self.db,
-                               use_unicode=True,
-                               charset='utf8',
-                               autocommit=True,
-                               cursorclass=pymysql.cursors.DictCursor)
+  
 
-    def closeAllConnections(self, conn):
-
-        if conn.open:
-            conn.close()
-
+   
     def insertUrlsForKrit(self, kritUrls):
         try:
              self.mydb['stadturls'].insert_one(dict(kritUrls))
         except Exception as e:
             print(e)
             
-    def deletEentryBeforeCrawl(self, entry):
+    def deleteEntriesFromYesterday(self, entry):
+
+        dt = datetime.today()
+
+        yesterday = datetime(dt.year, dt.month, dt.day-2)
         self.mydb['immos'].delete_many({  'anbieter': { "$exists": True},
+                                         'createdAt' : {"$lt" :  yesterday },
                                         'standortDaten.Stadt.id' : entry['stadtid'],
                                         'immobilienTypDaten.immoRentType': entry['kaufen'],
-                                         'immobilienTypDaten.immoType': entry['haus'] })
+                                        'immobilienTypDaten.immoType': entry['haus'] })
         
     def findStadtUrls(self, stadtid):
         foundStadtUrls = self.mydb['stadturls'].find_one({'_id': ObjectId(stadtid)})

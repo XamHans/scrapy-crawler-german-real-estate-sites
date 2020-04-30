@@ -29,7 +29,6 @@ class WgsucheSpider(scrapy.Spider):
 
     def __init__(self, stadtid, *args, **kwargs):
         self.db =  DataBase()
-        self.conn = self.db.create_conn()
         self.stadtid =  stadtid
         self.extractor = ExtractViertel()
         self.extractor.init()
