@@ -6,7 +6,7 @@ import logging
 from pymongo import MongoClient
 import pymongo
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import date, timedelta, datetime
 
 class DataBase:
 
@@ -30,9 +30,8 @@ class DataBase:
             
     def deleteEntriesFromYesterday(self, entry):
 
-        dt = datetime.today()
+        yesterday = datetime.today() - timedelta(days=2)
 
-        yesterday = datetime(dt.year, dt.month, dt.day-2)
         self.mydb['immos'].delete_many({  'anbieter': { "$exists": True},
                                          'createdAt' : {"$lt" :  yesterday },
                                         'standortDaten.Stadt.id' : entry['stadtid'],
@@ -113,18 +112,10 @@ class DataBase:
             
     def returnChangedKritids(self):
         toDoStadte = []
-        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 345, 'Stadt': 'Regensburg' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 4332, 'Stadt': 'München' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 4332, 'Stadt': 'München' })
-        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 4332, 'Stadt': 'München' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 128, 'Stadt': 'Berlin' })
-        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 128, 'Stadt': 'Berlin' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 128, 'Stadt': 'Berlin' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 415, 'Stadt': 'Köln' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 415, 'Stadt': 'Köln' })
-        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 702, 'Stadt': 'Hamburg' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 702, 'Stadt': 'Hamburg' })
-        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 702, 'Stadt': 'Hamburg' })
+      
+        toDoStadte.append( {'Haus':0, 'Kaufen': 0, 'Stadtid': 461, 'Stadt': 'Amberg' })
+        toDoStadte.append( {'Haus':0, 'Kaufen': 1, 'Stadtid': 461, 'Stadt': 'Amberg' })
+        toDoStadte.append( {'Haus':1, 'Kaufen': 1, 'Stadtid': 461, 'Stadt': 'Amberg' })
         return toDoStadte
             
     def writeScrapStatistik(self, conn, anbieter, scrapCount):

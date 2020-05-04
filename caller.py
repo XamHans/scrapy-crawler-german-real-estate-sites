@@ -38,6 +38,7 @@ def _crawl():
 		
 		node = nodes[stadtCounter]
 		db.deleteEntriesFromYesterday(entry)
+	
 		print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
 		
 		stadtid = entry['_id'] 

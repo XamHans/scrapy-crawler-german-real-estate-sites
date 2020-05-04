@@ -51,14 +51,9 @@ class SparkasseSpider(scrapy.Spider):
         if self.userToStadt.get('kaufen') == 0:
             return
 
-        url = "https://immobilien.sparkasse.de/api/estate/?filterOptions=%7B%22page%22:1,%22zip_city_estate_id%22:%22" + self.stadtname + \
-            "%22,%22marketing_usage_object_type%22:%22buy_residential_house%22,%22perimeter%22:%2225%22,%22sort_by%22:%22distance_asc%22,%22limit%22:%22109%22,%22return_data%22:%22overview%22%7D&limit=99"
-
-        if self.Haus == 0:
-            url = url.replace("buy_residential_house",
-                              "buy_residential_flat", 1)
-
-        yield scrapy.Request(url, callback=self.parse)
+        #url = "https://immobilien.sparkasse.de/api/estate/?filterOptions=%7B%22page%22:1,%22zip_city_estate_id%22:%22" + self.stadtname + \
+        #    "%22,%22marketing_usage_object_type%22:%22buy_residential_house%22,%22perimeter%22:%2225%22,%22sort_by%22:%22distance_asc%22,%22limit%22:%22109%22,%22return_data%22:%22overview%22%7D&limit=99"
+        yield scrapy.Request(self.userToStadt['sparkasse'], callback=self.parse)
 
     def parse(self, response):
         jsonresponse = json.loads(response.body_as_unicode())
@@ -93,12 +88,17 @@ class SparkasseSpider(scrapy.Spider):
             if "grundstuecksflaeche" in jsonitem["flaechen"]:
                 loader.add_value(
                     "grundstuck", jsonitem["flaechen"]["grundstuecksflaeche"])
-
-            try:
-                self.getViertelIDFromLatLon(
-                    jsonitem["sip"]["location"]["lat"], jsonitem["sip"]["location"]["lon"], item)
-            except Exception as e:
-                traceback.print_exception(type(e), e, e.__traceback__)
+            if "geo" in jsonitem:
+                item['adresse'] = jsonitem["geo"]["ort"]
+                if "strasse" in jsonitem["geo"]:
+                    item['adresse'] =  item['adresse'] + ', ' + jsonitem["geo"]["strasse"]
+            else:
+                item['adresse'] = ''
+            # try:
+            #     self.getViertelIDFromLatLon(
+            #         jsonitem["sip"]["location"]["lat"], jsonitem["sip"]["location"]["lon"], item)
+            # except Exception as e:
+            #     traceback.print_exception(type(e), e, e.__traceback__)
 
             url = "https://immobilien.sparkasse.de/" + jsonitem["id"]
 
@@ -142,7 +142,23 @@ class SparkasseSpider(scrapy.Spider):
                     loader.add_value(bil, value)
                 except Exception:
                     pass
+                
+            images = []
+            for i in jsonitem["sip"]["images"]:
+                try:
+                    if not i:
+                        break
+                    images.append(i["formats"]["original"])
+                except Exception as e:
+                    traceback.print_exception(type(e), e, e.__traceback__)
+                    print("Fehler in Bild xpath Auslesen")
+            try:
+                item['images']= images
+                yield loader.load_item()
 
+            except Exception as e:
+                print(e)
+                
             yield loader.load_item()
 
     @classmethod
@@ -153,24 +169,24 @@ class SparkasseSpider(scrapy.Spider):
                                 signal=signals.spider_closed)
         return spider
 
-    def getViertelIDFromLatLon(self, lat, lon, item):
-        url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%s&lon=%s" % (
-            lat, lon)
-        r = requests.get(url=url)
-        item["stadtvid"] = 0
-        if not r:
-            return
-        nominatimresp = json.loads(r.content.decode('utf-8'))
+    # def getViertelIDFromLatLon(self, lat, lon, item):
+    #     url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%s&lon=%s" % (
+    #         lat, lon)
+    #     r = requests.get(url=url)
+    #     item["stadtvid"] = 0
+    #     if not r:
+    #         return
+    #     nominatimresp = json.loads(r.content.decode('utf-8'))
        
-        if 'address' in nominatimresp and 'suburb' in nominatimresp["address"]:
-            stadtviertel = nominatimresp["address"]["suburb"]
-            #print("STADTVIERTEL GEFUNDEN ALS: " + stadtviertel)
-            stadtvid = self.extractor.extractAdresse(
-                 str(nominatimresp["address"]["road"]), 99, self.stadtid)
-            item['stadtvid'] = stadtvid
-            item["adresse"] = nominatimresp["address"]["road"]
-        item["lat"] = lat
-        item["lon"] = lon
+    #     if 'address' in nominatimresp and 'suburb' in nominatimresp["address"]:
+    #         stadtviertel = nominatimresp["address"]["suburb"]
+    #         #print("STADTVIERTEL GEFUNDEN ALS: " + stadtviertel)
+    #         stadtvid = self.extractor.extract (
+    #              str(nominatimresp["address"]["road"]), 99, self.stadtid)
+    #         item['stadtvid'] = stadtvid
+    #         item["adresse"] = nominatimresp["address"]["road"]
+    #     item["lat"] = lat
+    #     item["lon"] = lon
            
 
         
