@@ -222,22 +222,8 @@ class WGItem(scrapy.Item):
     adresse = scrapy.Field(input_processor=MapCompose(
         remove_whitespacewg), output_processor=TakeFirst())
     url = scrapy.Field()
-    bild1 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild2 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild3 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild4 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild5 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild6 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild7 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
-    bild8 = scrapy.Field(input_processor=MapCompose(
-        remove_whitespacewg), output_processor=TakeFirst())
+    images = scrapy.Field()
+
     stadtid = scrapy.Field()
     stadtvid = scrapy.Field(input_processor=MapCompose(
         remove_whitespacewg), output_processor=TakeFirst())
