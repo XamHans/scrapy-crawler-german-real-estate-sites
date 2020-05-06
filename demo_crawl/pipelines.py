@@ -232,6 +232,113 @@ class MongoDbPipeline(object):
         if len(ausstattungArray) > 0:
             transObject['ausstattungDaten'] = ausstattungArray
         return transObject
+    
+    def transformWGItem(self, item):
+        stadt = self.mydb.findStadt(item['stadtid'])
+        ausstattungArray = []
+        print('WGITEM URL IST ' + str(item['url']))
+        transObject = {
+            '_id': str(uuid.uuid4()),
+            'immobilienTypDaten': 
+                                {
+                                    'immoType': item['haus']
+                                },
+            'standortDaten':    
+                                {
+                                    'Stadt': stadt
+                                },
+            'basisDaten':    
+                                {
+                                    'flache': item['flache']
+                                },
+
+            'beschreibungDaten': 
+                                {
+                                    'title': item['title']
+                                },
+            'fotoDaten': 
+                                {
+                                    'images': item['images']
+                                },
+            'url': item['url'],
+            'anbieter': item['anbieter'],
+            'createdAt':  datetime.datetime.utcnow(),
+        }
+      
+        if 'adresse' in item:
+            transObject["standortDaten"]["strasse"] =  item['adresse']
+
+        if 'bezugsfreiab' in item:
+            transObject["basisDaten"]["bezugsfreiab"] =  item['bezugsfreiab'] 
+            
+        transObject["wgDaten"] = {}
+        if 'anzahlf' in item:
+            transObject["wgDaten"]["anzahlf"] =  item['anzahlf'] 
+        if 'anzahlm' in item:
+            transObject["wgDaten"]["anzahlm"] =  item['anzahlm'] 
+        if 'gesuchtf' in item:
+            transObject["wgDaten"]["gesuchtf"] =  item['gesuchtf'] 
+        if 'gesuchtm' in item:
+            transObject["wgDaten"]["gesuchtm"] =  item['gesuchtm'] 
+
+        if 'keller' in item:
+            ausstattungArray.append( {
+                '_id': 1,
+                'name': 'Keller'
+            }) 
+        if 'haustier' in item:
+            ausstattungArray.append( {
+                '_id': 2,
+                'name': 'Haustiere erlaubt'
+            }) 
+        if 'ebk' in item:
+            ausstattungArray.append( {
+                '_id': 3,
+                'name': 'Einbauküche'
+            }) 
+        if 'provisionsfrei' in item:
+            ausstattungArray.append( {
+                '_id': 9,
+                'name': 'Provisionsfrei'
+            }) 
+        if 'garage' in item:
+            ausstattungArray.append( {
+                '_id': 4,
+                'name': 'Garage'
+            }) 
+        if 'terrasse' in item:
+            ausstattungArray.append( {
+                '_id': 5,
+                'name': 'Terrasse'
+            }) 
+        if 'garten' in item:
+            ausstattungArray.append( {
+                '_id': 10,
+                'name': 'Garten'
+            }) 
+        if 'balkon' in item:
+            ausstattungArray.append( {
+                '_id': 6,
+                'name': 'Balkon'
+            }) 
+        if 'aufzug' in item:
+            ausstattungArray.append( {
+                '_id': 7,
+                'name': 'Aufzug'
+            }) 
+        if 'mobliert' in item:
+            ausstattungArray.append( {
+                '_id': 11,
+                'name': 'Möbliert'
+            }) 
+        if 'barriefrei' in item:
+            ausstattungArray.append( {
+                '_id': 8,
+                'name': 'Barrierefrei'
+            }) 
+        if len(ausstattungArray) > 0:
+            transObject['ausstattungDaten'] = ausstattungArray
+        return transObject
 
     def process_item(self, item, spider):
         try:
@@ -252,25 +359,14 @@ class MongoDbPipeline(object):
                     if 'ort' in item:
                         item['adresse'] = item['ort']
 
-                if 'adresse' in item and 'lat' not in item:
-
-                    addresseMitStadt = item['adresse']
-                    if 'stadtname' in item:
-                        addresseMitStadt = item['adresse'] + \
-                            ', ' + item['stadtname']
-
-                    # self.getLanLonMapQuest(addresseMitStadt, item)
-                    
-                # if 'lat' in item:
-                #     try:
-                #         self.ermittleStadtvidFromSuburb(item)
-                #     except Exception as e:
-                #         print(e)
+        
                 try:
                     if 'stadtname' in item:
                         del item['stadtname']
-                    mongoStructureItem = self.transformItem(item)
-                    print( 'insert mongoStrucitem mit URL ' + mongoStructureItem['url'])
+                    if item["haus"] == 2:
+                        mongoStructureItem = self.transformWGItem(item)
+                    else:
+                        mongoStructureItem = self.transformItem(item)
                     self.mydb.insertMongoImmos(mongoStructureItem)
                     logging.warning('insert item :' +str(item))
                 except Exception as e:
@@ -279,7 +375,8 @@ class MongoDbPipeline(object):
                     # self.db[self.collection].update_one({"url": item['url']}, { "$set": {"alive": datetime.datetime.now().strftime(
                     # '%Y-%m-%d %H:%M:%S')} })
                     self.stopCondition += 1
-
+            else:
+                print('LURCH')
         except Exception as e:
             print('FEHLER PIPELINE:')
             traceback.print_exception(type(e), e, e.__traceback__)

@@ -64,52 +64,61 @@ class WgsucheSpider(scrapy.Spider):
             loader.add_value("gesamtkosten",jsonitem["rent"])
             if "size" in jsonitem:
                 loader.add_value("flache",jsonitem["size"])
-            else:
-                raise DropItem("Missing flatsize in %s" % item)    
+            item["haus"] = 2
             loader.add_value("anbieter","5")
-            if "from" in jsonitem:
-                loader.add_value("bezugsfreiab",jsonitem["from"])
-            if "membersWomanCount" in jsonitem:
-                loader.add_value("anzahlf",jsonitem["membersWomanCount"])
-            if "membersManCount" in jsonitem:
-                loader.add_value("anzahlm",jsonitem["membersManCount"])
-            if "wantedAmountFemale" in jsonitem:
-                loader.add_value("gesuchtf",jsonitem["wantedAmountFemale"])   
-            if "wantedAmountMale" in jsonitem:
-                loader.add_value("gesuchtm",jsonitem["wantedAmountMale"])  
-            if "garden" in jsonitem:   
-                loader.add_value("garten",jsonitem["garden"])
-            if "balcony" in jsonitem:     
-                loader.add_value("balkon",jsonitem["balcony"])
-            if "elevator" in jsonitem:     
-                loader.add_value("aufzug",jsonitem["elevator"])
-            if "barrierFree" in jsonitem: 
-                loader.add_value("barriefrei",jsonitem["barrierFree"])
-            if "street" in jsonitem and "streetNumber" in jsonitem:  
-                loader.add_value("adresse",jsonitem["street"] + " " + jsonitem["streetNumber"] )
-            if "street" in jsonitem:
-                loader.add_value("adresse",jsonitem["street"])
-            if "furnished" in jsonitem:  
-                loader.add_value("moebliert",jsonitem["furnished"]  )    
+           
             loader.add_value("url","https://www.wg-suche.de/angebot/" + str ( jsonitem["id"] ) )
             loader.add_value("stadtid",self.stadtid)
 
             if "borough" in jsonitem:
                 viertel =  jsonitem['borough']
-                item['adresse'] = viertel
-
+                if 'adresse' in item:
+                    item['adresse'] = viertel + ', ' +  item['adresse']
+                else:
+                    item['adresse'] = viertel
+            loader.load_item()
+            apiUrl = 'https://api.wg-suche.de/v1_0/offer/' +  str ( jsonitem["id"] ) 
+            yield scrapy.Request(
+                    apiUrl, callback=self.parse_images, meta={"item": item})
+           
+           
+    def parse_images(self, response):
             try:
-                images = []
-                images.append(jsonitem["image"]["urls"]["XL"]["url"])
-                item['images'] = images
-                yield loader.load_item()
+                transItem = response.meta["item"]
+                jsonresponse = json.loads(response.body_as_unicode())
 
+                loader = ItemLoader(transItem, selector=response, response=response)
+                if "from" in jsonresponse:
+                        loader.add_value("bezugsfreiab",jsonresponse["from"])
+                if "membersWomanCount" in jsonresponse:
+                    loader.add_value("anzahlf",jsonresponse["membersWomanCount"])
+                if "membersManCount" in jsonresponse:
+                    loader.add_value("anzahlm",jsonresponse["membersManCount"])
+                if "wantedAmountFemale" in jsonresponse:
+                    loader.add_value("gesuchtf",jsonresponse["wantedAmountFemale"])   
+                if "wantedAmountMale" in jsonresponse:
+                    loader.add_value("gesuchtm",jsonresponse["wantedAmountMale"])  
+                if "garden" in jsonresponse:   
+                    loader.add_value("garten",jsonresponse["garden"])
+                if "balcony" in jsonresponse:     
+                    loader.add_value("balkon",jsonresponse["balcony"])
+                if "elevator" in jsonresponse:     
+                    loader.add_value("aufzug",jsonresponse["elevator"])
+                if "barrierFree" in jsonresponse: 
+                    loader.add_value("barriefrei",jsonresponse["barrierFree"])
+                if "street" in jsonresponse and "streetNumber" in jsonresponse:  
+                    loader.add_value("adresse",jsonresponse["street"] + " " + jsonresponse["streetNumber"] )
+                if "street" in jsonresponse:
+                    loader.add_value("adresse",jsonresponse["street"])
+                if "furnished" in jsonresponse:  
+                    loader.add_value("moebliert",jsonresponse["furnished"]  )    
+                    transItem["images"] = []
+                for image in jsonresponse["images"]:
+                    transItem["images"].append(image["urls"]["ORIGINAL"]["url"])
+                yield loader.load_item()
             except Exception as e:
                 print(e)
                 
-        
-        return loader.load_item()
-
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(WgsucheSpider, cls).from_crawler(crawler, *args, **kwargs)

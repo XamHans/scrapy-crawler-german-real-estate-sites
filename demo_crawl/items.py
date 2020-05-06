@@ -196,21 +196,31 @@ class ImmobilieItem(scrapy.Item):
 class WGItem(scrapy.Item):
     title = scrapy.Field(input_processor=MapCompose(
         remove_whitespacewg), output_processor=TakeFirst())
-    gesamtkosten = scrapy.Field()
-    flache = scrapy.Field()
-    anbieter = scrapy.Field()
+    gesamtkosten =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+    flache = scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+    anbieter =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+    haus =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
     bezugsfreiab = scrapy.Field()
     wgsize = scrapy.Field()
-    anzahlf = scrapy.Field()
-    anzahlm = scrapy.Field()
-    gesuchtf = scrapy.Field()
-    gesuchtm = scrapy.Field()
+    anzahlf =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+    anzahlm =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+    gesuchtf =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+    gesuchtm =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
     wgwomenonly = scrapy.Field()
     garten = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     balkon = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
-    kaution = scrapy.Field()
+    kaution = scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
     aufzug = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     moebliert = scrapy.Field(input_processor=MapCompose(
@@ -223,7 +233,8 @@ class WGItem(scrapy.Item):
         remove_whitespacewg), output_processor=TakeFirst())
     url = scrapy.Field()
     images = scrapy.Field()
-
-    stadtid = scrapy.Field()
+    createdat = scrapy.Field()
+    stadtid =  scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToNumber), output_processor=TakeFirst())
     stadtvid = scrapy.Field(input_processor=MapCompose(
         remove_whitespacewg), output_processor=TakeFirst())
