@@ -60,23 +60,6 @@ class WgsucheSpider(scrapy.Spider):
         for jsonitem in jsonresponse["result"]:
             item=WGItem()
             loader = ItemLoader(item, selector=response, response=response) 
-            loader.add_value("title",jsonitem["title"])
-            loader.add_value("gesamtkosten",jsonitem["rent"])
-            if "size" in jsonitem:
-                loader.add_value("flache",jsonitem["size"])
-            item["haus"] = 2
-            loader.add_value("anbieter","5")
-           
-            loader.add_value("url","https://www.wg-suche.de/angebot/" + str ( jsonitem["id"] ) )
-            loader.add_value("stadtid",self.stadtid)
-
-            if "borough" in jsonitem:
-                viertel =  jsonitem['borough']
-                if 'adresse' in item:
-                    item['adresse'] = viertel + ', ' +  item['adresse']
-                else:
-                    item['adresse'] = viertel
-            loader.load_item()
             apiUrl = 'https://api.wg-suche.de/v1_0/offer/' +  str ( jsonitem["id"] ) 
             yield scrapy.Request(
                     apiUrl, callback=self.parse_images, meta={"item": item})
@@ -88,6 +71,27 @@ class WgsucheSpider(scrapy.Spider):
                 jsonresponse = json.loads(response.body_as_unicode())
 
                 loader = ItemLoader(transItem, selector=response, response=response)
+                loader.add_value("title",jsonresponse["title"])
+                transItem["haus"] = 2
+                transItem["anbieter"] = "5"            
+                transItem["url"] = "https://www.wg-suche.de/angebot/" + str ( jsonresponse["id"] )        
+                transItem["stadtid"] = self.stadtid
+           
+                loader.add_value("gesamtkosten",jsonresponse["rent"])
+                if "flatSize" in jsonresponse:
+                    loader.add_value("gesamtflache",jsonresponse["flatSize"])
+                if "size" in jsonresponse:
+                    loader.add_value("zimmerflache",jsonresponse["size"])
+                if "borough" in jsonresponse:
+                    viertel =  jsonresponse['borough']
+                    transItem['adresse'] = viertel
+                if not 'adresse' in transItem:
+                    transItem["adresse"] = ''
+                if 'street' in jsonresponse:
+                    transItem['adresse'] = transItem['adresse'] + ', ' + str(jsonresponse['street'])
+                if 'streetNumber' in jsonresponse:
+                    transItem['adresse'] = transItem['adresse'] + str(jsonresponse['streetNumber'])
+             
                 if "from" in jsonresponse:
                         loader.add_value("bezugsfreiab",jsonresponse["from"])
                 if "membersWomanCount" in jsonresponse:
@@ -98,6 +102,9 @@ class WgsucheSpider(scrapy.Spider):
                     loader.add_value("gesuchtf",jsonresponse["wantedAmountFemale"])   
                 if "wantedAmountMale" in jsonresponse:
                     loader.add_value("gesuchtm",jsonresponse["wantedAmountMale"])  
+                if "wantedAmountEven" in jsonresponse:
+                    loader.add_value("gesuchtm",1)  
+                    loader.add_value("gesuchtf",1)  
                 if "garden" in jsonresponse:   
                     loader.add_value("garten",jsonresponse["garden"])
                 if "balcony" in jsonresponse:     

@@ -241,7 +241,8 @@ class MongoDbPipeline(object):
             '_id': str(uuid.uuid4()),
             'immobilienTypDaten': 
                                 {
-                                    'immoType': item['haus']
+                                    'immoType': item['haus'],
+                                    'immoRentType': 0
                                 },
             'standortDaten':    
                                 {
@@ -249,7 +250,12 @@ class MongoDbPipeline(object):
                                 },
             'basisDaten':    
                                 {
-                                    'flache': item['flache']
+                                    'flache': item['gesamtflache'],
+                                    'zimmerflache': item['zimmerflache']
+                                },
+            'mietDaten':    
+                                {
+                                    'gesamtkosten': item['gesamtkosten']
                                 },
 
             'beschreibungDaten': 

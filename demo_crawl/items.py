@@ -49,6 +49,19 @@ def parseToNumber(value):
         logging.exception(e)
         return value
 
+def parseToWGNumber(value):
+    if not value:
+        return
+    try:
+        value = re.search(r'\d+(?:[.,]\d*)?', str(value)).group(0)
+        if '.' in str(value):
+            parsed_miete = str(value).split('.')[0]
+            val = int(parsed_miete)
+            return val
+    except Exception as e:
+        print(e)
+        return value
+
 def parseZimmerOrFlache(value):
     try:
         val = int(re.search(r'\d+', str(value)).group(0))
@@ -168,8 +181,6 @@ class ImmobilieItem(scrapy.Item):
     images = scrapy.Field()
     barriefrei = scrapy.Field(input_processor=MapCompose(
         booleanconverter, remove_whitespace), output_processor=TakeFirst())
-    adresse = scrapy.Field(input_processor=MapCompose(
-        remove_tags, remove_dot, remove_backslash), output_processor=TakeFirst())
     ort = scrapy.Field(input_processor=MapCompose(
         remove_tags, remove_whitespace), output_processor=TakeFirst())
     kaufen = scrapy.Field(input_processor=MapCompose(
@@ -197,30 +208,32 @@ class WGItem(scrapy.Item):
     title = scrapy.Field(input_processor=MapCompose(
         remove_whitespacewg), output_processor=TakeFirst())
     gesamtkosten =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
-    flache = scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+    gesamtflache = scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+    zimmerflache = scrapy.Field(input_processor=MapCompose(
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     anbieter =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     haus =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     bezugsfreiab = scrapy.Field()
     wgsize = scrapy.Field()
     anzahlf =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     anzahlm =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     gesuchtf =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     gesuchtm =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     wgwomenonly = scrapy.Field()
     garten = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     balkon = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     kaution = scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     aufzug = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     moebliert = scrapy.Field(input_processor=MapCompose(
@@ -235,6 +248,6 @@ class WGItem(scrapy.Item):
     images = scrapy.Field()
     createdat = scrapy.Field()
     stadtid =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToNumber), output_processor=TakeFirst())
+        remove_whitespace), output_processor=TakeFirst())
     stadtvid = scrapy.Field(input_processor=MapCompose(
         remove_whitespacewg), output_processor=TakeFirst())
