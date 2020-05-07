@@ -220,13 +220,13 @@ class WGItem(scrapy.Item):
     bezugsfreiab = scrapy.Field()
     wgsize = scrapy.Field()
     anzahlf =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+        remove_whitespace), output_processor=TakeFirst())
     anzahlm =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+        remove_whitespace), output_processor=TakeFirst())
     gesuchtf =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+        remove_whitespace), output_processor=TakeFirst())
     gesuchtm =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+        remove_whitespace), output_processor=TakeFirst())
     wgwomenonly = scrapy.Field()
     garten = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
