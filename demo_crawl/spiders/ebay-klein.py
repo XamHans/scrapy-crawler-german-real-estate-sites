@@ -20,7 +20,7 @@ from ExtractViertel import ExtractViertel
 import traceback
 import re
 
-class ImmonetSpider(scrapy.Spider):
+class EbayKleinSpider(scrapy.Spider):
     custom_settings = {
         'CLOSESPIDER_ITEMCOUNT': '125',
         'CLOSESPIDER_TIMEOUT': '60'
@@ -40,7 +40,7 @@ class ImmonetSpider(scrapy.Spider):
         self.userToStadt = self.db.findStadtUrls(stadtId)
         self.extractor = ExtractViertel()
         self.extractor.init()
-        super(ImmonetSpider, self).__init__(*args, **kwargs)
+        super(EbayKleinSpider, self).__init__(*args, **kwargs)
 
     def start_requests(self):
 
@@ -56,18 +56,13 @@ class ImmonetSpider(scrapy.Spider):
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(ImmonetSpider, cls).from_crawler(
+        spider = super(EbayKleinSpider, cls).from_crawler(
             crawler, *args, **kwargs)
         crawler.signals.connect(spider.spider_closed,
                                 signal=signals.spider_closed)
         return spider
 
     def parse(self, response):
-        if self.stop:
-            self.crawler.engine.close_spider(
-                self, 'Zu Viele DUPLICATE URL Errors ')
-            return
-
         immos = response.xpath(
             "//a[@class='ellipsis']/@href").extract()
     
@@ -93,90 +88,51 @@ class ImmonetSpider(scrapy.Spider):
         try:
             item = WGItem()
             loader = ItemLoader(item, selector=response, response=response)
-
+            item["url"] = response.url
+            item["haus"] = 2
             loader.add_xpath(
-                'title', "//h1[@id='viewad-title']/text()").get()  
-            loader.add_xpath('gesamtkosten', "//h2[@id='viewad-price']/text()").get()  
-            loader.add_xpath('zimmerflache', "(//span[@class='addetailslist--detail--value'])[2]/text()").get()  
-            item["adresse"] = response.xpath("//span[@id='viewad-locality']/text()").get()
+                'title', "//h1[@id='viewad-title']/text()")
+            loader.add_xpath('gesamtkosten', "//h2[@id='viewad-price']/text()")
+            loader.add_xpath('zimmerflache', "(//span[@class='addetailslist--detail--value'])[3]/text()")
+            loader.add_xpath('adresse', "//span[@id='viewad-locality']/text()")
 
-            
-          
-            images = []
-            for i in range(1, 8):
+            stadtid = response.meta["stadtid"]
+            loader.add_value('stadtid', stadtid)
+            loader.add_value('anbieter', "6")
+
+            images = response.xpath("//div[contains(@class, 'galleryimage-element')]/img/@src").getall()
+            item["images"] = []
+            for image in images:
                 try:
-                    # bil = 'bild%s' % (str(i))
-                    xpath = '//div[@class="fotorama "]/div[%s]/@data-full' % (
-                        str(i))
-                    bildUrl = response.xpath(xpath).get()
-                    if not bildUrl:
-                        break
-                    images.append(bildUrl)
+                   item["images"].append(image)
                 except Exception as e:
                     traceback.print_exception(type(e), e, e.__traceback__)
-                    print("Fehler in Bild xpath Auslesen")
+                    print(e)
 
-            item['images'] = images
            
           
 
             loader.add_xpath(
-                'terrasse', "//span[contains(text(),'Terrasse')]/text()")
+                'keller', "//ul[@class='checktaglist']//text()[contains(.,'Keller')]")
             loader.add_xpath(
-                'balkon', "//span[contains(text(),'Balkon')]/text()")
+                'garage', "//ul[@class='checktaglist']//text()[contains(.,'Garage')]")
             loader.add_xpath(
-                'keller', "//span[contains(text(),'Keller')]/text()")
+                'garage', "//ul[@class='checktaglist']//text()[contains(.,'Haustiere erlaubt')]")
             loader.add_xpath(
-                'garten', "//span[contains(text(),'Garten')]/text()")
-            ebk = response.xpath(
-                "//span[contains(text(),'EBK')]/text()").extract()
-            if ebk:
-                loader.add_value('ebk', "1")
-            add = response.xpath(
-                "normalize-space(//p[@class='text-100 pull-left']/text())").get()
-            ort = response.xpath(
-                "///p[@class='text-100 pull-left']/text()[preceding-sibling::br]").get()
-            if ort:
-                newAdd = str(add) + ', ' + \
-                    str(ort)
-                loader.add_value('adresse', newAdd.encode("utf-8"))
-            else:
-                add = add + ',' + response.meta["ortsviertel"]
-                loader.add_value('adresse', str(add).encode("utf-8"))
+                'barriefrei', "//ul[@class='checktaglist']//text()[contains(.,'Stufenloser Zugang')]")
+            loader.add_xpath(
+                'moebliert', "//ul[@class='checktaglist']//text()[contains(.,'Möbliert')]")
 
-            loader.add_xpath(
-                'aufzug', "//span[contains(text(),'Personenaufzug')]/text()")
-            loader.add_xpath(
-                'barriefrei', "//span[contains(text(),'Barrierefrei')]/text()")
-            loader.add_xpath(
-                'mobliert', "//span[contains(text(),'Möbliert/Teilmöbliert')]/text()")
-
-            stadtid = response.meta["stadtid"]
-
-            ortsviertel = response.meta["ortsviertel"]
-            if ortsviertel and str(ortsviertel).isalpha():
-                stadtvid = self.extractor.extractAdresse(
-                str(ortsviertel), 2, self.stadtid)
-                if stadtvid and stadtvid != 0:
-                    loader.add_value('stadtvid', stadtvid)
-
-            else:
-                loader.add_value('stadtvid', self.stadtvid)
-
-            loader.add_value('stadtid', stadtid)
-            loader.add_value('anbieter', "4")
-            loader.add_value('stadtname', self.stadtname)
+         
+           
 
             yield loader.load_item()
 
         except Exception as e:
-            print("ERROR IMMONET IN PARSE ITEM:")
+            print("ERROR EBAYKLEIN IN PARSE ITEM:")
             print(traceback.print_exception(type(e), e, e.__traceback__))
 
     def spider_closed(self, spider):
-       # self.db.setScrapedTime(self.conn, self.id)
-        print("IMMONET scraped :" + str(spider.crawler.stats.get_value(
+        print("EBAY KLEIN scraped :" + str(spider.crawler.stats.get_value(
             'item_scraped_count')) + " IN DER STADT : " + str(self.stadtname))
-        # self.db.writeScrapStatistik(
-        #     self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
-        # self.db.closeAllConnections(self.conn)
+      

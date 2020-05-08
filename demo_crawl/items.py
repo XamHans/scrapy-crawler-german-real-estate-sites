@@ -20,7 +20,7 @@ def remove_whitespace(value):
 def remove_whitespacewg(value):
     try:
         stringer = value.strip().replace(
-            "[", "").replace("]", "").replace(u'\u201e', '')
+            "[", "").replace("]", "").replace(u'\u201e', '').replace('\xa093053', '').replace('\n','')
         return stringer
     except:
         print("SCHEI? QUOTES :" + str(value))
@@ -55,9 +55,9 @@ def parseToWGNumber(value):
     try:
         value = re.search(r'\d+(?:[.,]\d*)?', str(value)).group(0)
         if '.' in str(value):
-            parsed_miete = str(value).split('.')[0]
-            val = int(parsed_miete)
-            return val
+            value = str(value).split('.')[0]
+        val = int(value)
+        return val
     except Exception as e:
         print(e)
         return value
@@ -230,6 +230,10 @@ class WGItem(scrapy.Item):
     wgwomenonly = scrapy.Field()
     garten = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
+    garage = scrapy.Field(input_processor=MapCompose(
+        booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
+    keller = scrapy.Field(input_processor=MapCompose(
+        booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     balkon = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     kaution = scrapy.Field(input_processor=MapCompose(
@@ -238,6 +242,8 @@ class WGItem(scrapy.Item):
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
     moebliert = scrapy.Field(input_processor=MapCompose(
         booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
+    haustier = scrapy.Field(input_processor=MapCompose(
+        haustierconverter, remove_whitespace), output_processor=TakeFirst())
     lat = scrapy.Field()
     lon = scrapy.Field()
     barriefrei = scrapy.Field(input_processor=MapCompose(

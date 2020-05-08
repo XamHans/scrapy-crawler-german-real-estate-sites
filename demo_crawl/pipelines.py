@@ -250,7 +250,6 @@ class MongoDbPipeline(object):
                                 },
             'basisDaten':    
                                 {
-                                    'flache': item['gesamtflache'],
                                     'zimmerflache': item['zimmerflache']
                                 },
             'mietDaten':    
@@ -270,6 +269,10 @@ class MongoDbPipeline(object):
             'anbieter': item['anbieter'],
             'createdAt':  datetime.datetime.utcnow(),
         }
+
+        if 'flache' in item:
+            transObject["basisDaten"]["flache"]: item['gesamtflache']
+
       
         if 'adresse' in item:
             transObject["standortDaten"]["strasse"] =  item['adresse']
