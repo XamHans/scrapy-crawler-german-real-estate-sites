@@ -92,8 +92,16 @@ class EbayKleinSpider(scrapy.Spider):
             item["haus"] = 2
             loader.add_xpath(
                 'title', "//h1[@id='viewad-title']/text()")
-            loader.add_xpath('gesamtkosten', "//h2[@id='viewad-price']/text()")
-            loader.add_xpath('zimmerflache', "(//span[@class='addetailslist--detail--value'])[3]/text()")
+            kosten = response.xpath("//h2[@id='viewad-price']/text()").get()
+            if '.' in str(kosten):
+                kosten = kosten.replace('.','')
+            loader.add_value('gesamtkosten', kosten)
+
+            flache = response.xpath("//ul[@class='addetailslist']//text()[contains(.,'Wohnfläche')]/../span/text()").get()
+            if '.' in str(flache):
+                flache = flache.replace('.','')
+            loader.add_value('zimmerflache', flache)
+
             loader.add_xpath('adresse', "//span[@id='viewad-locality']/text()")
 
             stadtid = response.meta["stadtid"]
