@@ -214,7 +214,7 @@ class WGItem(scrapy.Item):
     zimmerflache = scrapy.Field(input_processor=MapCompose(
         remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     anbieter =  scrapy.Field(input_processor=MapCompose(
-        remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
+        remove_whitespace), output_processor=TakeFirst())
     haus =  scrapy.Field(input_processor=MapCompose(
         remove_whitespace, parseToWGNumber), output_processor=TakeFirst())
     bezugsfreiab = scrapy.Field()

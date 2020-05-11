@@ -84,6 +84,9 @@ class EbayKleinSpider(scrapy.Spider):
             print('NEXT URL IST ' + str(url))
             yield scrapy.Request(url, self.parse, meta={"stadtid": self.stadtid})
 
+    def hasNumbers(self, inputString):
+        return any(char.isdigit() for char in inputString)
+
     def parse_item(self, response):
         try:
             item = WGItem()
@@ -93,6 +96,9 @@ class EbayKleinSpider(scrapy.Spider):
             loader.add_xpath(
                 'title', "//h1[@id='viewad-title']/text()")
             kosten = response.xpath("//h2[@id='viewad-price']/text()").get()
+            if not self.hasNumbers(kosten):
+                print('KEIN NUMBERS GEFUNDEN IN KOSTEN ' + str(kosten))
+                return
             if '.' in str(kosten):
                 kosten = kosten.replace('.','')
             loader.add_value('gesamtkosten', kosten)
