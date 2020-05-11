@@ -270,6 +270,10 @@ class MongoDbPipeline(object):
             'createdAt':  datetime.datetime.utcnow(),
         }
 
+        if int(transObject["basisDaten"]["zimmerflache"]) > 35:
+            transObject["basisDaten"]["flache"] = transObject["basisDaten"]["zimmerflache"]
+            del transObject["basisDaten"]["zimmerflache"]
+        
         if 'flache' in item:
             transObject["basisDaten"]["flache"]: item['gesamtflache']
 
