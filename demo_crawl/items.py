@@ -191,7 +191,8 @@ class ImmobilieItem(scrapy.Item):
         booleanconverter, remove_whitespace), output_processor=TakeFirst())
     url = scrapy.Field(input_processor=MapCompose(
         remove_tags), output_processor=TakeFirst())
-
+    adresse = scrapy.Field(input_processor=MapCompose(
+        remove_whitespace), output_processor=TakeFirst())
     stadtid = scrapy.Field(input_processor=MapCompose(
         remove_whitespace), output_processor=TakeFirst())
     stadtvid = scrapy.Field(input_processor=MapCompose(
