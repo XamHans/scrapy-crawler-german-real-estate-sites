@@ -9,20 +9,16 @@ import time
 
 db = DataBase()
 
-stadtList = db.findAllStadtUrl()
+stadtList = db.findAllWGStadtUrl()
 stadtCounter = 0
 
-immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse"]
+immoAnbieter = [ "wgsuche", "ebay"]
 
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
 'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
 'http://immorobo-4.herokuapp.com:80/schedule.json' ]
 
-nodes2 = [ 'http://immorobo-5.herokuapp.com:80/schedule.json',  'http://immorobo-6.herokuapp.com:80/schedule.json',
-'http://immorobo-7.herokuapp.com:80/schedule.json',  'http://immorobo-8.herokuapp.com:80/schedule.json',
-'http://immorobo-9.herokuapp.com:80/schedule.json'     ]
 
-nodes = nodes + nodes2
 # A callback that unpacks and prints the results of a DeferredList
 
 def _crawl():
@@ -31,7 +27,7 @@ def _crawl():
 	for entry in stadtList:
      
 		stadtCounter += 1
-		if stadtCounter > 9:
+		if stadtCounter > 4:
 			stadtCounter = 0
 			print('MACHE PAUSE')
 			time.sleep(60 * 2)  

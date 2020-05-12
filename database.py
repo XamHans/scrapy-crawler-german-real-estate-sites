@@ -41,6 +41,10 @@ class DataBase:
     def findAllStadtUrl(self):
         foundStadtUrls = self.mydb['stadturls'].find()
         return foundStadtUrls
+
+    def findAllWGStadtUrl(self):
+        foundStadtUrls = self.mydb['stadturls'].find({'haus': 2})
+        return foundStadtUrls
     
     def findStadt(self, stadtid):
         foundStadt = self.mydb['stadte'].find_one({'id': int(stadtid)})
