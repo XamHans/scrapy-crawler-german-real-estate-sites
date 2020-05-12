@@ -236,7 +236,7 @@ class MongoDbPipeline(object):
     def transformWGItem(self, item):
         stadt = self.mydb.findStadt(item['stadtid'])
         ausstattungArray = []
-        print('WGITEM URL IST ' + str(item['url']))
+        print('WGITEM URL IST ' + str(item))
         transObject = {
             '_id': str(uuid.uuid4()),
             'immobilienTypDaten': 
@@ -270,13 +270,14 @@ class MongoDbPipeline(object):
             'createdAt':  datetime.datetime.utcnow(),
         }
 
+
         if transObject["anbieter"] == "6":
             if int(transObject["basisDaten"]["zimmerflache"]) > 35:
                 transObject["basisDaten"]["flache"] = transObject["basisDaten"]["zimmerflache"]
                 del transObject["basisDaten"]["zimmerflache"]
         
-        if 'flache' in item:
-            transObject["basisDaten"]["flache"]: item['gesamtflache']
+        if 'gesamtflache' in item:
+            transObject["basisDaten"]["flache"] =  item['gesamtflache']
 
       
         if 'adresse' in item:
