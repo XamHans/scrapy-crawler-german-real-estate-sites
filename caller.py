@@ -30,13 +30,13 @@ def _crawl():
 	global stadtList, stadtCounter
 	for entry in stadtList:
      
-		stadtCounter += 1
 		if stadtCounter > 9:
 			stadtCounter = 0
 			print('MACHE PAUSE')
 			time.sleep(60 * 2)  
 		
 		node = nodes[stadtCounter]
+		stadtCounter += 1
 		db.deleteEntriesFromYesterday(entry)
 	
 		print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 

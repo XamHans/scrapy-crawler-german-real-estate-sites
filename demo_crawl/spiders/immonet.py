@@ -91,7 +91,7 @@ class ImmonetSpider(scrapy.Spider):
             print('no textmitimmoanzahl', str(textMitImmoAnzahl))
             return
         self.foundImmos = int(re.findall('\d+', str(textMitImmoAnzahl))[0])
-        #print('Max immos zahl : ' + str(self.foundImmos))
+        print('Max immos zahl : ' + str(self.foundImmos))
         immos = response.xpath(
             "//a[contains(@id,'lnkToDetails_')]/@href").extract()
         viertelList = response.xpath(
@@ -217,10 +217,11 @@ class ImmonetSpider(scrapy.Spider):
                     gesamtk = response.xpath("//div[@id='priceid_1']/text()").get()
                     if not gesamtk:
                             logging.error('keine gesamtkosten KAUFEN gefunden bei url: '+ str(response.url))
-                            return
-                    gesamtk = re.search(r'\d+(?:[.,]\d*)?', str(gesamtk)).group(0)
-                    parsed_gesamtk = parse_decimal(str(gesamtk), locale='en')
-                    item['gesamtkosten'] = int(round(parsed_gesamtk))
+                            item['gesamtkosten'] = 'auf Anfrage'
+                    else:
+                        gesamtk = re.search(r'\d+(?:[.,]\d*)?', str(gesamtk)).group(0)
+                        parsed_gesamtk = parse_decimal(str(gesamtk), locale='en')
+                        item['gesamtkosten'] = int(round(parsed_gesamtk))
                 except Exception:
                     gesamtk = response.xpath("//div[@id='priceid_1']/text()").get()
                     if not gesamtk:
@@ -258,11 +259,10 @@ class ImmonetSpider(scrapy.Spider):
                 loader.add_value('ebk', "1")
             add = response.xpath(
                 "normalize-space(//p[@class='text-100 pull-left']/text())").get()
-            ort = response.xpath(
-                "///p[@class='text-100 pull-left']/text()[preceding-sibling::br]").get()
-            if ort:
+           
+            if  add:
                 newAdd = str(add) + ', ' + \
-                    str(ort)
+                    str(response.meta["ortsviertel"])
                 loader.add_value('adresse', newAdd.encode("utf-8"))
             else:
                 add = add + ',' + response.meta["ortsviertel"]
