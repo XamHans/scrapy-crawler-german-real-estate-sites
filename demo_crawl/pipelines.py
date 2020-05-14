@@ -142,7 +142,6 @@ class MongoDbPipeline(object):
             'standortDaten':    
                                 {
                                     'Stadt': stadt,
-                                    'strasse': item['adresse']
                                 },
             'basisDaten':    
                                 {
@@ -169,11 +168,13 @@ class MongoDbPipeline(object):
             transObject['standortDaten']['Stadt']['Stadtviertel'] = {'index': item['stadtvid']}
         if 'adresse' in item:
             transObject['standortDaten']['strasse'] = item['adresse']
+            if len(str(transObject['standortDaten']['strasse'])) > 100:
+                print('ERROR STRASSE ' + str(transObject['standortDaten']['strasse']))
+                transObject['standortDaten']['strasse'] = ''
         if item['kaufen'] == 0:
             transObject['mietDaten'] = { 'gesamtkosten': item['gesamtkosten']}
         else:
             transObject['kaufDaten'] = { 'kaufpreis': item['gesamtkosten']}
-            
         if 'keller' in item:
             ausstattungArray.append( {
                 '_id': 1,
