@@ -382,7 +382,6 @@ class MongoDbPipeline(object):
                         mongoStructureItem = self.transformWGItem(item)
                     else:
                         mongoStructureItem = self.transformItem(item)
-                        print('TRANSFORMED ITEM '+ str(mongoStructureItem))
                     self.mydb.insertMongoImmos(mongoStructureItem)
                     logging.warning('insert item :' +str(item))
                 except Exception as e:
