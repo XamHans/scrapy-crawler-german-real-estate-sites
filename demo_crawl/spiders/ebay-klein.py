@@ -121,10 +121,7 @@ class EbayKleinSpider(scrapy.Spider):
                    item["images"].append(image)
                 except Exception as e:
                     traceback.print_exception(type(e), e, e.__traceback__)
-                    print(e)
-
-           
-          
+                    print(e)  
 
             loader.add_xpath(
                 'keller', "//ul[@class='checktaglist']//text()[contains(.,'Keller')]")

@@ -44,7 +44,6 @@ class ImmoSpider(scrapy.Spider):
         self.userToStadt = self.db.findStadtUrls(stadtId)
         if not self.userToStadt:
             print('USERTOSTADT IST NULL')
-            return
         else:
             print('bearbeite ', self.userToStadt)
         self.extractor = ExtractViertel()
@@ -87,7 +86,7 @@ class ImmoSpider(scrapy.Spider):
             for i in immos:
                 url = 'https://www.wohnungsmarkt24.de/' + i
                 if self.db.checkIfInDupUrl(url) == False:
-                    yield scrapy.Request(url=url, callback=self.parse_item, dont_filter=True, meta={"stadtid": stadtid})
+                    yield scrapy.Request(url=url, callback=self.parse_item, dont_filter=True, meta={"stadtid": stadtid, "url": url})
             
                 next_page = response.xpath(
                     "//a[@class='nextLink slink']/@href").get()
@@ -103,85 +102,49 @@ class ImmoSpider(scrapy.Spider):
         try:
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
+            loader.add_xpath(
+                'title', "//h1[@class='headline-expose']/text()")
+            item['url'] = response.meta["url"]
 
-            for info in response.xpath("//div[@class='criteriagroup criteria-group--two-columns']"):
-                loader = ItemLoader(item, selector=info, response=response)
-                loader.add_xpath(
-                    'title', "//h1[@id='expose-title']/text()")
-                loader.add_xpath(
-                    'typ', ".//dd[@class='is24qa-typ grid-item three-fifths']/text()")
-                loader.add_xpath(
-                    'bezugsfreiab', ".//dd[@class='is24qa-bezugsfrei-ab grid-item three-fifths']/text()")
-                loader.add_xpath(
-                    'haustier', ".//dd[@class='is24qa-haustiere grid-item three-fifths']/text()")
-                garage = response.xpath(
-                    ".//dd[@class='is24qa-garage-stellplatz grid-item three-fifths']/text()").extract()
-                if garage:
-                    loader.add_xpath('garage', "1")
-                loader.add_xpath(
-                    'url', "//link[@rel='canonical']/@href")
-
-            loader.load_item()
+            bilder = response.xpath("//div[@class='carousel-inner']//div/img/@src").getall()
             images = []
-            for i in range(1, 8):
+            for i in bilder:
                 try:
-                    bild = response.xpath('(//img[@class=\'sp-image \']/@data-src)[%s]' % (str(i))).extract()
-                    if not bild:
-                        break
-                    images.append(bild)
+                    print(str(i))
+                    images.append(i)
                 except:
                     print("Fehler in Bild xpath Auslesen")
             try:
                 item['images'] = images
             except Exception as e:
                 logging.warning('fehler bei zuwesien von images to  item :' +str(e))
-
+                
+            zimmer = response.xpath("//div[@class='row margin-bottom-10']//div[3]/strong/text()").get()
             loader.add_xpath(
-                'zimmer', "//dd[@class='is24qa-zimmer grid-item three-fifths']/text()")
+                'zimmer', "//div[@class='row margin-bottom-10']//div[3]/strong/text()")
+            flache = response.xpath("//tr[@class='odd'][3]//td[@class='value']/text()").get()
 
+            loader.add_value('flache', flache)  
+            
             if self.Kaufen == 0:
-                loader.add_value('kaufen', '0')
-              
-                kaltmiete = response.xpath("//div[@class='is24qa-kaltmiete is24-value font-semibold']/text()").get()
-                loader.add_value('kaltmiete', kaltmiete)
-                flache = response.xpath("//div[@class='is24qa-flaeche is24-value font-semibold']/text()").get()
-                if flache:
-                    if ',' in flache:
-                        flache = str(flache).split(',')[0]
-                   
-                loader.add_value(
-                    'flache', flache)
-                loader.add_xpath(
-                    'nebenkosten', "//dd[@class='is24qa-nebenkosten grid-item three-fifths']/text()[2]")
-                try:
-                    gesamtk = response.xpath("//dd[@class='is24qa-gesamtmiete grid-item three-fifths font-bold']/text()").get()
-                    if not gesamtk:
-                	    gesamtk = kaltmiete
-                    loader.add_value('gesamtkosten', gesamtk)
-                except Exception:
-                    pass
-                loader.add_xpath(
-                    'gesamtkosten', "//dd[@class='is24qa-gesamtmiete grid-item three-fifths font-bold']/text()")
+                
+                loader.add_value('kaufen', '0')    
+                gesamtk = response.xpath("//tr[@class='odd'][1]//td[@class='value']/text()").get()
+                loader.add_value('gesamtkosten', gesamtk)
+         
 
             else:
                 loader.add_value('kaufen', '1')
                 loader.add_xpath(
-                    'gesamtkosten', "//div[@class='is24qa-kaufpreis is24-value font-semibold is24-preis-value']/text()")
-                loader.add_xpath(
-                    'flache', "//dd[@class='is24qa-wohnflaeche-ca grid-item three-fifths']/text()")
-                loader.add_xpath(
-                    'provisionsfrei', "//span[@class='is24qa-provisionsfrei-label']/text()")
+                    'gesamtkosten', "//tr[@class='odd'][1]//td[@class='value']/text()")
+                loader.add_xpath('provisionsfrei', "//text()[contains(.,'provisionsfrei')]")
 
             if self.Haus == 1:
                 loader.add_value('haus', '1')
                 loader.add_xpath(
-                    'grundstuck', "//dd[@class='is24qa-grundstueck-ca grid-item three-fifths']/text()")
+                    'grundstuck', "//tr[@class='even'][3]//td[@class='value']/text()")
             else:
                 loader.add_value('haus', '0')
-
-            loader.load_item()
-            add = ""
-
            
             loader.add_xpath(
                 'keller', "//text()[contains(.,'Keller')]")
@@ -194,43 +157,28 @@ class ImmoSpider(scrapy.Spider):
             loader.add_xpath(
                 'barriefrei', "//text()[contains(.,'Stufenloser Zugang')]")
             loader.add_xpath(
-                'moebliert', "//text()[contains(.,'Möbliert')]")
+                'moebliert', "//text()[contains(.,'Möbliert')]")    
+            loader.add_xpath(
+                'terrasse', "//text()[contains(.,'Terrassen')]")
             
             add = response.xpath(
-                    "//span[@class='block font-nowrap print-hide']/text()").extract()
-            viertel = response.xpath('//ul[@class="breadcrumb__item--current"]/preceding::a[1]').get()
-            loader.add_value(
-                'ort', viertel)
+                    "//h2[@title='Daten']/text()").get()
+         
             if add:
-                add = str(add) + ', ' + str(viertel)
+                add = add.split('-')[1]
                 loader.add_value('adresse', str(add).encode("utf-8"))
             
-            viertel = response.xpath('//ul[@class="breadcrumb__item--current"]/preceding::a[1]/text()').get()
-
-            if viertel:
-                stadtvid = self.extractor.extractAdresse( str(viertel), 0, self.stadtid)
-                loader.add_value('stadtvid', stadtvid)
-            # if stadtvid == 0 and add:
-            #     stadtvid = self.extractor.extractAdresse(
-            #         self.conn, str(add), 1, self.stadtid)
-            #     loader.add_value('stadtvid', stadtvid)
-            # else:
-            #     loader.add_value('stadtvid', 0)
 
             loader.add_value('stadtid', self.stadtid)
-            loader.add_value('anbieter', "0")
+            loader.add_value('anbieter', "7")
             loader.add_value('stadtname', self.stadtname)
 
             yield loader.load_item()
 
         except Exception as e:
-            print("ERROR IMMOSCOUT IN PARSE ITEM:")
+            print("ERROR WOHNUNGSMARKT24 IN PARSE ITEM:")
             traceback.print_exception(type(e), e, e.__traceback__)
 
     def spider_closed(self, spider):
-        #self.db.setScrapedTime(self.conn, self.id)
-        print("IMMOSCOUT scraped :" + 
+        print("WOHNUNGSMARKT 24 scraped :" + 
         str(spider.crawler.stats.get_value('item_scraped_count')))
-        # self.db.writeScrapStatistik(
-        #     self.conn, 1, spider.crawler.stats.get_value('item_scraped_count'))
-        # self.db.closeAllConnections(self.conn)

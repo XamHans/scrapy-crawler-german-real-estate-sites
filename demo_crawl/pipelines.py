@@ -375,7 +375,6 @@ class MongoDbPipeline(object):
                     if 'ort' in item:
                         item['adresse'] = item['ort']
 
-        
                 try:
                     if 'stadtname' in item:
                         del item['stadtname']
@@ -383,16 +382,17 @@ class MongoDbPipeline(object):
                         mongoStructureItem = self.transformWGItem(item)
                     else:
                         mongoStructureItem = self.transformItem(item)
+                        print('TRANSFORMED ITEM '+ str(mongoStructureItem))
                     self.mydb.insertMongoImmos(mongoStructureItem)
                     logging.warning('insert item :' +str(item))
                 except Exception as e:
-                    print(e)
+                    print('FEHLER' + str(e))
                     logging.warning(e)
                     # self.db[self.collection].update_one({"url": item['url']}, { "$set": {"alive": datetime.datetime.now().strftime(
                     # '%Y-%m-%d %H:%M:%S')} })
                     self.stopCondition += 1
             else:
-                print('LURCH')
+                print('KEIN TITLE ODER URL')
         except Exception as e:
             print('FEHLER PIPELINE:')
             traceback.print_exception(type(e), e, e.__traceback__)

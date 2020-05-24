@@ -203,7 +203,8 @@ class ImmobilieItem(scrapy.Item):
     alive = scrapy.Field()
     stadtname = scrapy.Field(input_processor=MapCompose(
         remove_whitespace), output_processor=TakeFirst())
-
+    moebliert = scrapy.Field(input_processor=MapCompose(
+        booleanwgconverter, remove_whitespace), output_processor=TakeFirst())
 
 class WGItem(scrapy.Item):
     title = scrapy.Field(input_processor=MapCompose(
