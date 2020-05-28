@@ -12,7 +12,7 @@ db = DataBase()
 stadtList = db.findAllStadtUrl()
 stadtCounter = 0
 
-immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse"]
+immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse", "wohnungsmarkt24"]
 
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
 'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
@@ -46,7 +46,6 @@ def _crawl():
 		data = {
 		'project' : 'default',
 		'spider' : 'immonet',
-		'setting' : 'CLOSESPIDER_PAGECOUNT=10',
 		'setting' : 'CLOSESPIDER_TIMEOUT=60',
 		'stadtId' : stadtid
 		}

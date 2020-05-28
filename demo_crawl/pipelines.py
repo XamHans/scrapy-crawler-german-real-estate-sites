@@ -383,7 +383,6 @@ class MongoDbPipeline(object):
                     else:
                         mongoStructureItem = self.transformItem(item)
                     self.mydb.insertMongoImmos(mongoStructureItem)
-                    logging.warning('insert item :' +str(item))
                 except Exception as e:
                     print('FEHLER' + str(e))
                     logging.warning(e)
