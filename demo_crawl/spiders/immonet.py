@@ -214,12 +214,11 @@ class ImmonetSpider(scrapy.Spider):
                 loader.add_value('kaufen', '1')
 
                 try:
-                    gesamtk = response.xpath("//div[@id='priceid_1']/text()").get()
+                    gesamtk = response.xpath("//div[@id='priceid_1']/text()").get().strip().replace('€','')
                     if not gesamtk:
                             logging.error('keine gesamtkosten KAUFEN gefunden bei url: '+ str(response.url))
                             item['gesamtkosten'] = 'auf Anfrage'
                     else:
-                        gesamtk = re.search(r'\d+(?:[.,]\d*)?', str(gesamtk)).group(0)
                         parsed_gesamtk = parse_decimal(str(gesamtk), locale='en')
                         item['gesamtkosten'] = int(round(parsed_gesamtk))
                 except Exception:
