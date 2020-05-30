@@ -83,11 +83,9 @@ class ImmoSpider(scrapy.Spider):
             if response.status == 410:
                 print("HALLO 404")
                 yield scrapy.Request(self.standardurl, callback=self.parse, meta={"stadtid": self.stadtid})
-
             immos = response.xpath(
-                "//a[@class='result-list-entry__brand-title-container']/@href").extract()
+                "//a[contains(@class,'result-list-entry__brand-title-container')]/@href").extract()
             stadtid = response.meta["stadtid"]
-
             for i in immos:
                 if 'https://' in str(i):
                     continue
