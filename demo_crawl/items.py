@@ -39,7 +39,7 @@ def parseToNumber(value):
     if not value:
         return
     try:
-        value = re.search(r'\d+(?:[.,]\d*)?', str(value)).group(0)
+        value = re.search(r'\b\d[\d,.]*\b', str(value)).group(0)
         parsed_miete = parse_decimal(str(value), locale='de')
         if '.' in str(parsed_miete):
             parsed_miete = str(parsed_miete).split('.')[0]

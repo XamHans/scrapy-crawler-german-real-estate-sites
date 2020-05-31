@@ -27,7 +27,7 @@ class ImmoSpider(scrapy.Spider):
         'CLOSESPIDER_TIMEOUT': '60'
     }
 
-    name = 'wohnungsmarkt24'
+    name = 'ohnemakler'
     conn = None
     Kaufen = 0
     Haus = 0
@@ -59,9 +59,9 @@ class ImmoSpider(scrapy.Spider):
             self.stadtid = self.userToStadt["stadtid"]
             self.stadtname = self.userToStadt["stadtname"]
             # self.stadtvid = self.userToStadt["StadtVid")
-            print( ("wohnungsmarkt24 mache url {}").format(self.userToStadt['wohnungsmarkt24']))
+            print( ("ohnemakler mache url {}").format(self.userToStadt['ohnemakler']))
 
-            yield scrapy.Request(self.userToStadt['wohnungsmarkt24'], callback=self.parse, meta={"stadtid": self.stadtid})
+            yield scrapy.Request(self.userToStadt['ohnemakler'], callback=self.parse, meta={"stadtid": self.stadtid})
         except Exception as e:
             print(e)
             
@@ -80,37 +80,38 @@ class ImmoSpider(scrapy.Spider):
                 return
 
             immos = response.xpath(
-                "//p[@class='headline-se-1']/a/@href").extract()
+                "//a[@class='red']/@href").extract()
             stadtid = response.meta["stadtid"]
 
             for i in immos:
-                url = 'https://www.wohnungsmarkt24.de/' + i
+                url = 'https://www.ohne-makler.net/' + i
                 if self.db.checkIfInDupUrl(url) == False:
                     yield scrapy.Request(url=url, callback=self.parse_item, dont_filter=True, meta={"stadtid": stadtid, "url": url})
             
                 next_page = response.xpath(
-                    "//a[@class='nextLink slink']/@href").get()
+                    "//li[@class='next']/a/@href").get()
                 if next_page:
                     url = response.urljoin(next_page)
+                    print('URL IST ' + str(url))
                     yield scrapy.Request(url, self.parse, meta={"stadtid": self.stadtid})
 
         except Exception as e:
-            print("ERROR IN WOHNUNGSMARKT24 PARSE:")
+            print("ERROR IN OHNEMAKLER PARSE:")
             traceback.print_exception(type(e), e, e.__traceback__)
 
     def parse_item(self, response):
         try:
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
+          
             loader.add_xpath(
-                'title', "//h1[@class='headline-expose']/text()")
+                'title', "//h1[@class='blue']/text()")
             item['url'] = response.meta["url"]
 
-            bilder = response.xpath("//div[@class='carousel-inner']//div/img/@src").getall()
+            bilder = response.xpath("//a[contains(@class, 'pictures')]/@href").getall()
             images = []
             for i in bilder:
                 try:
-                    print(str(i))
                     images.append(i)
                 except:
                     print("Fehler in Bild xpath Auslesen")
@@ -119,30 +120,38 @@ class ImmoSpider(scrapy.Spider):
             except Exception as e:
                 logging.warning('fehler bei zuwesien von images to  item :' +str(e))
                 
-            zimmer = response.xpath("//div[@class='row margin-bottom-10']//div[3]/strong/text()").get()
-            loader.add_xpath(
-                'zimmer', "//div[@class='row margin-bottom-10']//div[3]/strong/text()")
-            flache = response.xpath("//tr[@class='odd'][3]//td[@class='value']/text()").get()
+            zimmer = response.xpath("//text()[contains(.,'Zimmer (Anzahl)')]/ancestor::p/text()[2]").get()
+            loader.add_value('zimmer', zimmer)  
 
+            flache = response.xpath("//text()[contains(.,'Wohnfläche')]/ancestor::p/text()[2]").get()
             loader.add_value('flache', flache)  
             
             if self.Kaufen == 0:
                 
                 loader.add_value('kaufen', '0')    
-                gesamtk = response.xpath("//tr[@class='odd'][1]//td[@class='value']/text()").get()
+                gesamtk = response.xpath("//text()[contains(.,'Pauschal')]/ancestor::p/span/text()").get()
+                if not gesamtk:
+                    kaltmiete = response.xpath("//text()[contains(.,'Kaltmiete')]/ancestor::p/span/text()").get().replace('€','').replace('.','').strip()
+                    print('KALTMIETE IST '+ str(kaltmiete))
+                    
+                    nebenkosten = response.xpath("//text()[contains(.,'Summe Nebenkosten')]/ancestor::p/text()[2]").get().replace('€','').replace('.','').strip()
+                    print('SUMME NEBENKOSTEN IST '+ str(nebenkosten))
+                    
+                    gesamtk = float(kaltmiete) + float(nebenkosten)
+                print('GESAMTK IST '+ str(int(round(gesamtk))))
                 loader.add_value('gesamtkosten', gesamtk)
          
 
             else:
                 loader.add_value('kaufen', '1')
                 loader.add_xpath(
-                    'gesamtkosten', "//tr[@class='odd'][1]//td[@class='value']/text()")
+                    'gesamtkosten', "//text()[contains(.,'Kaufpreis')]/ancestor::p/span/text()")
                 loader.add_xpath('provisionsfrei', "//text()[contains(.,'provisionsfrei')]")
 
             if self.Haus == 1:
                 loader.add_value('haus', '1')
                 loader.add_xpath(
-                    'grundstuck', "//tr[@class='even'][3]//td[@class='value']/text()")
+                    'grundstuck', "//text()[contains(.,'Grundstücksfläche')]/ancestor::p/text()[2]")
             else:
                 loader.add_value('haus', '0')
            
@@ -153,32 +162,34 @@ class ImmoSpider(scrapy.Spider):
             loader.add_xpath(
                 'garage', "//text()[contains(.,'Garage')]")
             loader.add_xpath(
+                'garten', "//text()[contains(.,'Garten')]")
+            loader.add_xpath(
+                'ebk', "//text()[contains(.,'Einbauküche')]")
+            loader.add_xpath(
                 'haustier', "//text()[contains(.,'Haustiere erlaubt')]")
             loader.add_xpath(
-                'barriefrei', "//text()[contains(.,'Stufenloser Zugang')]")
+                'barriefrei', "//text()[contains(.,'Barrierefrei')]")
             loader.add_xpath(
                 'moebliert', "//text()[contains(.,'Möbliert')]")    
             loader.add_xpath(
-                'terrasse', "//text()[contains(.,'Terrassen')]")
+                'terrasse', "//text()[contains(.,'Terrasse')]")
             
-            add = response.xpath(
-                    "//h2[@title='Daten']/text()").get()
+            add = response.xpath("//div[@class='span4'][3]//h4/following::p[1]/text()").get().strip()
          
             if add:
-                add = add.split('-')[1]
                 loader.add_value('adresse', str(add).encode("utf-8"))
             
 
             loader.add_value('stadtid', self.stadtid)
-            loader.add_value('anbieter', "7")
+            loader.add_value('anbieter', "8")
             loader.add_value('stadtname', self.stadtname)
 
             yield loader.load_item()
 
         except Exception as e:
-            print("ERROR WOHNUNGSMARKT24 IN PARSE ITEM:")
+            print("ERROR OHNEMAKLER IN PARSE ITEM:")
             traceback.print_exception(type(e), e, e.__traceback__)
 
     def spider_closed(self, spider):
-        print("WOHNUNGSMARKT 24 scraped :" + 
+        print("OHNEMAKLER  scraped :" + 
         str(spider.crawler.stats.get_value('item_scraped_count')))
