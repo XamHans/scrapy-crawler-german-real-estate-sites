@@ -112,7 +112,8 @@ class ImmoSpider(scrapy.Spider):
             images = []
             for i in bilder:
                 try:
-                    images.append(i)
+                    bild = 'https://www.ohne-makler.net' + i
+                    images.append(bild)
                 except:
                     print("Fehler in Bild xpath Auslesen")
             try:

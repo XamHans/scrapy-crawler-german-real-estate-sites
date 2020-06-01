@@ -64,7 +64,12 @@ class SparkasseSpider(scrapy.Spider):
             loader = ItemLoader(item, selector=response, response=response)
 
             loader.add_value("title", jsonitem["freitexte"]["objekttitel"])
-            loader.add_value("gesamtkosten", jsonitem["preise"]["kaufpreis"])
+            kaufpreis = ''
+            if '.' in  jsonitem["preise"]["kaufpreis"]:
+                kaufpreis = jsonitem["preise"]["kaufpreis"].split('.')[0]
+            else:
+                kaufpreis = jsonitem["preise"]["kaufpreis"]
+            loader.add_value("gesamtkosten", kaufpreis)
             loader.add_value("flache", jsonitem["flaechen"]["wohnflaeche"])
 
             if "anzahl_zimmer" in jsonitem["flaechen"]:

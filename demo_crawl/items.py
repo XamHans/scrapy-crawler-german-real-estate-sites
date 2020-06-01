@@ -40,10 +40,12 @@ def parseToNumber(value):
         return
     try:
         value = re.search(r'\b\d[\d,.]*\b', str(value)).group(0)
+        print('FOUND VALUE IST ' + str(value))
         parsed_miete = parse_decimal(str(value), locale='de')
         if '.' in str(parsed_miete):
             parsed_miete = str(parsed_miete).split('.')[0]
         val = int(parsed_miete)
+        print('PARSED VALUE IST ' + str(val))
         return val
     except Exception as e:
         logging.exception(e)
