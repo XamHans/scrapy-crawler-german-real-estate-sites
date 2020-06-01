@@ -14,15 +14,18 @@ child1_2 = ElementTree.SubElement(child1, 'lastmod')
 child1_2.text = '2020-05-16'
 
 for stadt in stadtList:
-    stadt = stadt["Stadt"]
-    stadt = str(stadt).strip()
-    if not stadt:
+    stadtName = stadt["Stadt"]
+    stadtviertel = stadt["Stadtviertel"]
+    stadtName = str(stadtName).strip().replace(' ','')
+    if not stadtName:
         continue
-    print(stadt)
+    if len(stadtviertel) < 10:
+        print('zu wenige viertel, skip')
+        continue
 
     child1 = ElementTree.SubElement(root, 'url')
     child1_1 = ElementTree.SubElement(child1, 'loc')
-    child1_1.text = 'https://www.immorobo.de/#/list/'+stadt+"/wohnung/mieten/"
+    child1_1.text = 'https://www.immorobo.de/#/list/'+stadtName+"/wohnung/mieten/"
     child1_2 = ElementTree.SubElement(child1, 'lastmod')
     child1_2.text = '2020-05-16'
     child1_3 = ElementTree.SubElement(child1, 'changefreq')
@@ -32,7 +35,7 @@ for stadt in stadtList:
     
     child2 = ElementTree.SubElement(root, 'url')
     child2_1 = ElementTree.SubElement(child2, 'loc')
-    child2_1.text = 'https://www.immorobo.de/#/list/'+stadt+"/wohnung/kaufen/"
+    child2_1.text = 'https://www.immorobo.de/#/list/'+stadtName+"/wohnung/kaufen/"
     child2_2 = ElementTree.SubElement(child2, 'lastmod')
     child2_2.text = '2020-05-16'
     child1_3 = ElementTree.SubElement(child2, 'changefreq')
@@ -42,7 +45,7 @@ for stadt in stadtList:
     
     child3 = ElementTree.SubElement(root, 'url')
     child3_1 = ElementTree.SubElement(child3, 'loc')
-    child3_1.text = 'https://www.immorobo.de/#/list/'+stadt+"/haus/mieten/"
+    child3_1.text = 'https://www.immorobo.de/#/list/'+stadtName+"/haus/mieten/"
     child3_2 = ElementTree.SubElement(child3, 'lastmod')
     child3_2.text = '2020-05-16'
     child1_3 = ElementTree.SubElement(child3, 'changefreq')
@@ -52,7 +55,7 @@ for stadt in stadtList:
     
     child4 = ElementTree.SubElement(root, 'url')
     child4_1 = ElementTree.SubElement(child4, 'loc')
-    child4_1.text = 'https://www.immorobo.de/#/list/'+stadt+"/haus/kaufen/"
+    child4_1.text = 'https://www.immorobo.de/#/list/'+stadtName+"/haus/kaufen/"
     child4_2 = ElementTree.SubElement(child4, 'lastmod')
     child4_2.text = '2020-05-16'
     child1_3 = ElementTree.SubElement(child4, 'changefreq')
@@ -62,7 +65,7 @@ for stadt in stadtList:
     
     child5 = ElementTree.SubElement(root, 'url')
     child5_1 = ElementTree.SubElement(child5, 'loc')
-    child5_1.text = 'https://www.immorobo.de/#/list/'+stadt+"/wg/mieten/"
+    child5_1.text = 'https://www.immorobo.de/#/list/'+stadtName+"/wg/mieten/"
     child5_2 = ElementTree.SubElement(child5, 'lastmod')
     child5_2.text = '2020-05-16'
     child1_3 = ElementTree.SubElement(child5, 'changefreq')
