@@ -140,7 +140,7 @@ class ImmoSpider(scrapy.Spider):
                     
                     gesamtk = float(kaltmiete) + float(nebenkosten)
                 print('GESAMTK IST '+ str(int(round(gesamtk))))
-                loader.add_value('gesamtkosten', gesamtk)
+                loader.add_value('gesamtkosten', str(int(round(gesamtk))))
          
 
             else:
