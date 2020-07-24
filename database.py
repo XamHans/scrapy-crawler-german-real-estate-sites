@@ -26,7 +26,7 @@ class DataBase:
             
     def deleteEntriesFromYesterday(self, entry):
 
-        yesterday = datetime.today() - timedelta(days=1)
+        yesterday = datetime.today() - timedelta(days=2)
 
         self.mydb['immos'].delete_many({  'anbieter': { "$exists": True},
                                          'createdAt' : {"$lt" :  yesterday },

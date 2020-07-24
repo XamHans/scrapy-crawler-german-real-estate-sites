@@ -12,7 +12,8 @@ db = DataBase()
 stadtList = db.findAllStadtUrl()
 stadtCounter = 0
 
-immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse", "wohnungsmarkt24"]
+# immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse", "wohnungsmarkt24"]
+immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
 
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
 'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
@@ -37,7 +38,8 @@ def _crawl():
 		
 		node = nodes[stadtCounter]
 		stadtCounter += 1
-		db.deleteEntriesFromYesterday(entry)
+  		if datetime.now().hour == 7:
+			db.deleteEntriesFromYesterday(entry)
 	
 		print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
 		
