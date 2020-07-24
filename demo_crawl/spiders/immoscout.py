@@ -248,7 +248,6 @@ class ImmoSpider(scrapy.Spider):
     def getPagedUrl(self, response):
         if self.pageCounter == 0:
                 pageCounter = response.xpath('//*[@aria-label="Seitenauswahl"]/option/@value')[-1].extract()
-                pageCounterMAX = int(pageCounter)
                 print("PAGECOUNTER IST "+ str(pageCounter))
                 now = datetime.now()
                 pageCounter = int(pageCounter)
@@ -257,13 +256,12 @@ class ImmoSpider(scrapy.Spider):
                 elif now.hour == 10:
                     pageCounter = (pageCounter / 2) 
                 elif now.hour == 13:
-                    pageCounter = (pageCounter / 2) + 4
+                    pageCounter = (pageCounter / 2) + (pageCounter * 0.2)
                 elif now.hour == 16:
-                    pageCounter = pageCounter - 8
+                    pageCounter = pageCounter - (pageCounter * 0.2)
                 elif now.hour > 16:
-                    pageCounter = pageCounter - 4
-                if pageCounter > pageCounterMAX:
-                    pageCounter = pageCounterMAX
+                    pageCounter = pageCounter - (pageCounter * 0.1)    
+             
                 pageCounter = round(pageCounter)
                 url = response.urljoin("?pagenumber=" + str(pageCounter))
                 return url

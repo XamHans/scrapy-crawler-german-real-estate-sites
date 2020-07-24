@@ -307,8 +307,6 @@ class ImmonetSpider(scrapy.Spider):
         if self.pageCounter == 0:
                 pageCounter = response.xpath("//div[contains(@class, 'pagination-wrapper')]/ul/li[last()]/a/text()").get()
                 print("PAGECOUNTER IST "+ str(pageCounter))
-                pageCounterMAX = int(pageCounter)
-
                 now = datetime.now()
                 pageCounter = int(pageCounter)
                 if(now.hour == 7):
@@ -316,13 +314,12 @@ class ImmonetSpider(scrapy.Spider):
                 elif now.hour == 10:
                     pageCounter = (pageCounter / 2) 
                 elif now.hour == 13:
-                    pageCounter = (pageCounter / 2) + 4
+                    pageCounter = (pageCounter / 2) + (pageCounter * 0.2)
                 elif now.hour == 16:
-                    pageCounter = pageCounter - 8
+                    pageCounter = pageCounter - (pageCounter * 0.2)
                 elif now.hour > 16:
-                    pageCounter = pageCounter - 4
-                if pageCounter > pageCounterMAX:
-                    pageCounter = pageCounterMAX
+                    pageCounter = pageCounter - (pageCounter * 0.1)    
+               
                 pageCounter = round(pageCounter)
                 url = response.url
                 url = url + ("&page=" + str(pageCounter))
