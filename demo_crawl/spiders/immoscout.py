@@ -20,11 +20,11 @@ import signal
 from database import DataBase
 from ExtractViertel import ExtractViertel
 import traceback
+import pickle
 
 class ImmoSpider(scrapy.Spider):
     custom_settings = {
-        'CLOSESPIDER_ITEMCOUNT': '125',
-        'CLOSESPIDER_TIMEOUT': '60'
+        'CLOSESPIDER_ITEMCOUNT': '125'
     }
 
     name = 'immoscout'
@@ -36,7 +36,7 @@ class ImmoSpider(scrapy.Spider):
     userToStadt = None
     extractor = None
     stadtname = None
-
+    pageCounter = 0
     def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
         # self.conn = self.db.create_conn()
@@ -62,7 +62,8 @@ class ImmoSpider(scrapy.Spider):
             # self.stadtvid = self.userToStadt["StadtVid")
             print( ("IMMOSCOUT mache url {}").format(self.userToStadt['immoscout']))
 
-            yield scrapy.Request(self.userToStadt['immoscout'], callback=self.parse, meta={"stadtid": self.stadtid})
+            yield scrapy.Request(self.userToStadt['immoscout'], callback=self.detectPageStart, meta={"stadtid": self.stadtid})
+   
         except Exception as e:
             print(e)
             
@@ -72,17 +73,23 @@ class ImmoSpider(scrapy.Spider):
         crawler.signals.connect(spider.spider_closed,
                                 signal=signals.spider_closed)
         return spider
+    
+    def detectPageStart(self, response):
+        startPageUrl = self.getPagedUrl(response)
+        print('PAGE START IST ' + str(startPageUrl))
+        yield scrapy.Request(startPageUrl, callback=self.parse, meta={"stadtid": self.stadtid})
 
-    def parse(self, response):
+
+    def parse(self, response):      
         try:
             if self.stop:
                 self.crawler.engine.close_spider(
                     self, 'Zu Viele DUPLICATE URL Errors ')
                 return
-
             if response.status == 410:
                 print("HALLO 404")
                 yield scrapy.Request(self.standardurl, callback=self.parse, meta={"stadtid": self.stadtid})
+                
             immos = response.xpath(
                 "//a[contains(@class,'result-list-entry__brand-title-container')]/@href").extract()
             stadtid = response.meta["stadtid"]
@@ -95,9 +102,9 @@ class ImmoSpider(scrapy.Spider):
             
                 next_page = response.xpath(
                     "//a[@data-is24-qa='paging_bottom_next']/@href")
-                if next_page:
-                    url = response.urljoin(next_page[0].extract())
-                    yield scrapy.Request(url, self.parse, meta={"stadtid": self.stadtid})
+            if next_page:
+                nextPageUrl = response.urljoin(next_page[0].extract())
+                yield scrapy.Request(nextPageUrl, self.parse, meta={"stadtid": self.stadtid})
 
         except Exception as e:
             print("ERROR IN IMMOSCOUT PARSE:")
@@ -238,6 +245,29 @@ class ImmoSpider(scrapy.Spider):
             print("ERROR IMMOSCOUT IN PARSE ITEM:")
             traceback.print_exception(type(e), e, e.__traceback__)
 
+    def getPagedUrl(self, response):
+        if self.pageCounter == 0:
+                pageCounter = response.xpath('//*[@aria-label="Seitenauswahl"]/option/@value')[-1].extract()
+                pageCounterMAX = int(pageCounter)
+                print("PAGECOUNTER IST "+ str(pageCounter))
+                now = datetime.now()
+                pageCounter = int(pageCounter)
+                if(now.hour == 7):
+                    pageCounter = 1
+                elif now.hour == 10:
+                    pageCounter = (pageCounter / 2) 
+                elif now.hour == 13:
+                    pageCounter = (pageCounter / 2) + 4
+                elif now.hour == 16:
+                    pageCounter = pageCounter - 8
+                elif now.hour > 16:
+                    pageCounter = pageCounter - 4
+                if pageCounter > pageCounterMAX:
+                    pageCounter = pageCounterMAX
+                pageCounter = round(pageCounter)
+                url = response.urljoin("?pagenumber=" + str(pageCounter))
+                return url
+                
     def spider_closed(self, spider):
         #self.db.setScrapedTime(self.conn, self.id)
         print("IMMOSCOUT scraped :" + 

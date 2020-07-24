@@ -44,6 +44,7 @@ class ImmonetSpider(scrapy.Spider):
     userToStadt = None
     extractor = None
     foundImmos = 0
+    pageCounter = 0
 
     def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
@@ -62,7 +63,7 @@ class ImmonetSpider(scrapy.Spider):
             self.stadtname = self.userToStadt["stadtname"]
             self.stadtvid = 0
             print( ("IMMONET mache url {}").format(self.userToStadt['immonet']))
-            yield scrapy.Request(self.userToStadt['immonet'], callback=self.parse, meta={"stadtid": self.stadtid})
+            yield scrapy.Request(self.userToStadt['immonet'], callback=self.detectPageStart, meta={"stadtid": self.stadtid})
         except Exception as e:
             print(e)
 
@@ -73,7 +74,12 @@ class ImmonetSpider(scrapy.Spider):
         crawler.signals.connect(spider.spider_closed,
                                 signal=signals.spider_closed)
         return spider
-
+    
+    def detectPageStart(self, response):
+        startPageUrl = self.getPagedUrl(response)
+        print('PAGE START IST ' + str(startPageUrl))
+        yield scrapy.Request(startPageUrl, callback=self.parse, meta={"stadtid": self.stadtid})
+        
     def parse(self, response):
         if self.stop:
             self.crawler.engine.close_spider(
@@ -117,8 +123,8 @@ class ImmonetSpider(scrapy.Spider):
         next_page = response.xpath(
             "//a[contains(@class,'col-sm-3 col-xs-1 pull-right text-right')]/@href")
         if next_page:
-            url = response.urljoin(next_page[0].extract())
-            yield scrapy.Request(url, self.parse, meta={"stadtid": self.stadtid})
+            nextPageUrl = response.urljoin(next_page[0].extract())
+            yield scrapy.Request(nextPageUrl, self.parse, meta={"stadtid": self.stadtid})
 
     def parse_item(self, response):
         try:
@@ -296,6 +302,31 @@ class ImmonetSpider(scrapy.Spider):
             print("ERROR IMMONET IN PARSE ITEM:")
             print(traceback.print_exception(type(e), e, e.__traceback__))
 
+
+    def getPagedUrl(self, response):
+        if self.pageCounter == 0:
+                pageCounter = response.xpath("//div[contains(@class, 'pagination-wrapper')]/ul/li[last()]/a/text()").get()
+                print("PAGECOUNTER IST "+ str(pageCounter))
+                pageCounterMAX = int(pageCounter)
+
+                now = datetime.now()
+                pageCounter = int(pageCounter)
+                if(now.hour == 7):
+                    pageCounter = 1
+                elif now.hour == 10:
+                    pageCounter = (pageCounter / 2) 
+                elif now.hour == 13:
+                    pageCounter = (pageCounter / 2) + 4
+                elif now.hour == 16:
+                    pageCounter = pageCounter - 8
+                elif now.hour > 16:
+                    pageCounter = pageCounter - 4
+                if pageCounter > pageCounterMAX:
+                    pageCounter = pageCounterMAX
+                pageCounter = round(pageCounter)
+                url = response.url
+                url = url + ("&page=" + str(pageCounter))
+                return url
     def spider_closed(self, spider):
        # self.db.setScrapedTime(self.conn, self.id)
         print("IMMONET scraped :" + str(spider.crawler.stats.get_value(
