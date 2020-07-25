@@ -43,9 +43,8 @@ def _crawl():
 		data = {
 		'project' : 'default',
 		'spider' : 'immonet',
-		'setting' : 'CLOSESPIDER_PAGECOUNT=10',
-		'setting' : 'CLOSESPIDER_TIMEOUT=60',
-		'stadtId' : stadtid
+		'setting' : 'CLOSESPIDER_PAGECOUNT=10'
+  		'stadtId' : stadtid
 		}
 
 		for anbieter in immoAnbieter:

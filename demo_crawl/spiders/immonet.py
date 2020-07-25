@@ -24,9 +24,7 @@ from babel.numbers import parse_decimal
 
 class ImmonetSpider(scrapy.Spider):
     custom_settings = {
-        'CLOSESPIDER_ITEMCOUNT': '125',
-        'CLOSESPIDER_TIMEOUT': '60'
-
+        'CLOSESPIDER_ITEMCOUNT': '125'
     }
 
     name = 'immonet'

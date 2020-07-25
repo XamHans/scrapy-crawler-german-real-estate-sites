@@ -15,7 +15,6 @@ BOT_NAME = 'demo_crawl'
 SPIDER_MODULES = ['demo_crawl.spiders']
 NEWSPIDER_MODULE = 'demo_crawl.spiders'
 FEED_EXPORT_ENCODING = 'utf-8'
-CLOSESPIDER_TIMEOUT = 60
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

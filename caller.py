@@ -48,7 +48,6 @@ def _crawl():
 		data = {
 		'project' : 'default',
 		'spider' : 'immonet',
-		'setting' : 'CLOSESPIDER_TIMEOUT=60',
 		'stadtId' : stadtid
 		}
 

@@ -22,9 +22,7 @@ import re
 
 class EbayKleinSpider(scrapy.Spider):
     custom_settings = {
-        'CLOSESPIDER_ITEMCOUNT': '125',
-        'CLOSESPIDER_TIMEOUT': '60'
-
+        'CLOSESPIDER_ITEMCOUNT': '125'
     }
 
     name = 'ebay'
