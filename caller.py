@@ -30,32 +30,35 @@ def _crawl():
 
 	global stadtList, stadtCounter
 	for entry in stadtList:
-     
-		if stadtCounter > 9:
-			stadtCounter = 0
-			print('MACHE PAUSE')
-			time.sleep(60 * 2)  
+		try:
+			if stadtCounter > 9:
+				stadtCounter = 0
+				print('MACHE PAUSE')
+				time.sleep(60 * 2)  
+			
+			node = nodes[stadtCounter]
+			stadtCounter += 1
+			if datetime.now().hour == 7:
+				db.deleteEntriesFromYesterday(entry)
+			print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
+			
+			stadtid = entry['_id'] 
+
+			data = {
+			'project' : 'default',
+			'spider' : 'immonet',
+   			'setting' : 'CLOSESPIDER_TIMEOUT=300',
+			'stadtId' : stadtid
+			}
+
+			for anbieter in immoAnbieter:
+				data['spider'] = anbieter
+				response = requests.post(node, data=data)
+				#print(response.text)
+
+		except Exception as e:
+			print(e)
 		
-		node = nodes[stadtCounter]
-		stadtCounter += 1
-  		if datetime.now().hour == 7:
-			db.deleteEntriesFromYesterday(entry)
-	
-		print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
-		
-		stadtid = entry['_id'] 
-
-		data = {
-		'project' : 'default',
-		'spider' : 'immonet',
-		'stadtId' : stadtid
-		}
-
-		for anbieter in immoAnbieter:
-			data['spider'] = anbieter
-			response = requests.post(node, data=data)
-			#print(response.text)
-
 
 
 print("STARTE CRAWLER : " + str(datetime.now()))

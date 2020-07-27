@@ -12,7 +12,7 @@ class DataBase:
 
  
     mongo_immos = None
-    myclient = pymongo.MongoClient("mongodb://173.212.249.71:30001")
+    myclient = pymongo.MongoClient("mongodb://immo:Monfelsaje1,2.3!@173.212.249.71:30001/immo_db?authSource=immo_db")
     mydb = myclient["immo_db"]
     mongo_immos = mydb["immos"] 
   
@@ -25,9 +25,11 @@ class DataBase:
             print(e)
             
     def deleteEntriesFromYesterday(self, entry):
-
-        yesterday = datetime.today() - timedelta(days=2)
-
+        if entry['kaufen'] == 1:
+            yesterday = datetime.today() - timedelta(days=5)
+        else:
+            yesterday = datetime.today() - timedelta(days=2)
+            
         self.mydb['immos'].delete_many({  'anbieter': { "$exists": True},
                                          'createdAt' : {"$lt" :  yesterday },
                                         'standortDaten.Stadt.id' : entry['stadtid'],
