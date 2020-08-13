@@ -15,3 +15,4 @@ scrapyd-client
 logparser
 selenium
 herokuify-scrapyd==1.0
+scrapy-useragents

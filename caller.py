@@ -13,7 +13,8 @@ stadtList = db.findAllStadtUrl()
 stadtCounter = 0
 
 # immoAnbieter = [ "immonet", "immoscout", "meinestadt", "sparkasse", "wohnungsmarkt24"]
-immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
+# immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
+immoAnbieter = [  "immoscout"]
 
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
 'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
