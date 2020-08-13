@@ -247,7 +247,10 @@ class ImmoSpider(scrapy.Spider):
 
     def getPagedUrl(self, response):
         if self.pageCounter == 0:
-                pageCounter = response.xpath('//*[@aria-label="Seitenauswahl"]/option/@value')[-1].extract()
+                print(response)
+                return
+                pageCounter = response.xpath('//*[@aria-label="Seitenauswahl"]/option[last()]/@value').get()
+                print(pageCounter)
                 print("PAGECOUNTER IST "+ str(pageCounter))
                 now = datetime.now()
                 pageCounter = int(pageCounter)

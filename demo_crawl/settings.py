@@ -10,7 +10,7 @@
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import os
 
-BOT_NAME = 'demo_crawl'
+BOT_NAME = 'qweqwe'
 
 SPIDER_MODULES = ['demo_crawl.spiders']
 NEWSPIDER_MODULE = 'demo_crawl.spiders'
@@ -18,8 +18,19 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'demo_crawl (+http://www.yourdomain.com)'
-
+USER_AGENTS = [
+    ('Mozilla/5.0 (X11; Linux x86_64) '
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/57.0.2987.110 '
+     'Safari/537.36'),  # chrome
+    ('Mozilla/5.0 (X11; Linux x86_64) '
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/61.0.3163.79 '
+     'Safari/537.36'),  # chrome
+    ('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) '
+     'Gecko/20100101 '
+     'Firefox/55.0')  # firefox
+]
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
@@ -35,7 +46,7 @@ DOWNLOAD_DELAY = 10
 # CONCURRENT_REQUESTS_PER_IP = 1
 
 # Disable cookies (enabled by default)
-COOKIES_ENABLED = False
+COOKIES_ENABLED = True
 
 
 # Disable Telnet Console (enabled by default)
@@ -83,7 +94,9 @@ AUTOTHROTTLE_MAX_DELAY = 35
 #AUTOTHROTTLE_DEBUG = False
 DOWNLOADER_MIDDLEWARES = {
 
-    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500
     # 'proxyMiddleware.ProxyMiddleware': 350,
     # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 400,
     # 'proxyMiddleware.TooManyRequestsRetryMiddleware': 300,
