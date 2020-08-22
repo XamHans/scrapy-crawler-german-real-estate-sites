@@ -18,19 +18,8 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENTS = [
-    ('Mozilla/5.0 (X11; Linux x86_64) '
-     'AppleWebKit/537.36 (KHTML, like Gecko) '
-     'Chrome/57.0.2987.110 '
-     'Safari/537.36'),  # chrome
-    ('Mozilla/5.0 (X11; Linux x86_64) '
-     'AppleWebKit/537.36 (KHTML, like Gecko) '
-     'Chrome/61.0.3163.79 '
-     'Safari/537.36'),  # chrome
-    ('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) '
-     'Gecko/20100101 '
-     'Firefox/55.0')  # firefox
-]
+USER_AGENTS =  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0'
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
@@ -95,8 +84,8 @@ AUTOTHROTTLE_MAX_DELAY = 35
 DOWNLOADER_MIDDLEWARES = {
 
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500
+    # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    # 'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500
     # 'proxyMiddleware.ProxyMiddleware': 350,
     # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 400,
     # 'proxyMiddleware.TooManyRequestsRetryMiddleware': 300,

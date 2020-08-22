@@ -12,7 +12,7 @@ class DataBase:
 
  
     mongo_immos = None
-    myclient = pymongo.MongoClient("mongodb://immo:Monfelsaje1,2.3!@173.212.249.71:30001/immo_db?authSource=immo_db")
+    myclient = pymongo.MongoClient("mongodb://hans:DopeDaysGone1807!@161.97.79.7:30001/immo_db?authSource=admin")
     mydb = myclient["immo_db"]
     mongo_immos = mydb["immos"] 
   

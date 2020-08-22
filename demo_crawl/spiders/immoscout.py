@@ -61,8 +61,12 @@ class ImmoSpider(scrapy.Spider):
             self.stadtname = self.userToStadt["stadtname"]
             # self.stadtvid = self.userToStadt["StadtVid")
             print( ("IMMOSCOUT mache url {}").format(self.userToStadt['immoscout']))
+            headers = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
 
-            yield scrapy.Request(self.userToStadt['immoscout'], callback=self.detectPageStart, meta={"stadtid": self.stadtid})
+            yield scrapy.Request(self.userToStadt['immoscout'],
+                                headers=headers,
+                                callback=self.detectPageStart,
+                                meta={"stadtid": self.stadtid})
    
         except Exception as e:
             print(e)
@@ -75,8 +79,13 @@ class ImmoSpider(scrapy.Spider):
         return spider
     
     def detectPageStart(self, response):
+        print(response)
         startPageUrl = self.getPagedUrl(response)
         print('PAGE START IST ' + str(startPageUrl))
+        if startPageUrl is None:
+            print("STARTPAGEURL IS NULL")
+            return
+        
         yield scrapy.Request(startPageUrl, callback=self.parse, meta={"stadtid": self.stadtid})
 
 
@@ -247,10 +256,8 @@ class ImmoSpider(scrapy.Spider):
 
     def getPagedUrl(self, response):
         if self.pageCounter == 0:
-                print(response)
-                return
+              
                 pageCounter = response.xpath('//*[@aria-label="Seitenauswahl"]/option[last()]/@value').get()
-                print(pageCounter)
                 print("PAGECOUNTER IST "+ str(pageCounter))
                 now = datetime.now()
                 pageCounter = int(pageCounter)
