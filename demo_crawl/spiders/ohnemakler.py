@@ -134,7 +134,7 @@ class ImmoSpider(scrapy.Spider):
                     kaltmiete = response.xpath("//text()[contains(.,'Kaltmiete')]/ancestor::p/span/text()").get().replace('€','').replace('.','').strip()
                     print('KALTMIETE IST '+ str(kaltmiete))
                     
-                    nebenkosten = response.xpath("//text()[contains(.,'Summe Nebenkosten')]/ancestor::p/text()[2]").get().replace('€','').replace('.','').strip()
+                    nebenkosten = response.xpath("//text()[contains(.,'Nebenkosten')]/ancestor::p/text()[2]").get().replace('€','').replace('.','').strip()
                     print('SUMME NEBENKOSTEN IST '+ str(nebenkosten))
                     
                     gesamtk = float(kaltmiete) + float(nebenkosten)

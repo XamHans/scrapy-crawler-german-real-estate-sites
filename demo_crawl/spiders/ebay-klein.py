@@ -6,7 +6,7 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.http.request import Request
-from demo_crawl.items import WGItem
+from demo_crawl.items import ImmobilieItem, WGItem
 from scrapy.loader import ItemLoader
 import time
 from scrapy import signals
@@ -79,7 +79,6 @@ class EbayKleinSpider(scrapy.Spider):
             "//a[@class='pagination-next']/@href")
         if next_page:
             url =  self.userToStadt['ebay'] + str(next_page.get())
-            print('NEXT URL IST ' + str(url))
             yield scrapy.Request(url, self.parse, meta={"stadtid": self.stadtid})
 
     def hasNumbers(self, inputString):
@@ -87,12 +86,25 @@ class EbayKleinSpider(scrapy.Spider):
 
     def parse_item(self, response):
         try:
-            item = WGItem()
+            item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
             item["url"] = response.url
-            item["haus"] = 2
+            
+            if self.Haus == 1:
+                loader.add_value('haus', '1')
+                loader.add_xpath(
+                    'grundstuck', "//ul[@class='addetailslist']//text()[contains(.,'Grundstücksfläche')]/../span/text()")
+            else:
+                loader.add_value('haus', '0')
+                
             loader.add_xpath(
                 'title', "//h1[@id='viewad-title']/text()")
+            
+            if self.Kaufen == 0:
+                loader.add_value('kaufen', '0')
+            else:   
+                loader.add_value('kaufen', '1')
+
             kosten = response.xpath("//h2[@id='viewad-price']/text()").get()
             if not self.hasNumbers(kosten):
                 print('KEIN NUMBERS GEFUNDEN IN KOSTEN ' + str(kosten))
@@ -104,8 +116,8 @@ class EbayKleinSpider(scrapy.Spider):
             flache = response.xpath("//ul[@class='addetailslist']//text()[contains(.,'Wohnfläche')]/../span/text()").get()
             if '.' in str(flache):
                 flache = flache.replace('.','')
-            loader.add_value('zimmerflache', flache)
-
+            loader.add_value('flache', flache)
+            loader.add_xpath('zimmer',"//ul[@class='addetailslist']//text()[contains(.,'Zimmer')]/../span/text()")
             loader.add_xpath('adresse', "//span[@id='viewad-locality']/text()")
 
             stadtid = response.meta["stadtid"]
@@ -126,14 +138,19 @@ class EbayKleinSpider(scrapy.Spider):
             loader.add_xpath(
                 'garage', "//ul[@class='checktaglist']//text()[contains(.,'Garage')]")
             loader.add_xpath(
-                'garage', "//ul[@class='checktaglist']//text()[contains(.,'Haustiere erlaubt')]")
+                'haustier', "//ul[@class='checktaglist']//text()[contains(.,'Haustiere erlaubt')]")
             loader.add_xpath(
                 'barriefrei', "//ul[@class='checktaglist']//text()[contains(.,'Stufenloser Zugang')]")
             loader.add_xpath(
                 'moebliert', "//ul[@class='checktaglist']//text()[contains(.,'Möbliert')]")
-
-         
-           
+            loader.add_xpath(
+                'ebk', "//ul[@class='checktaglist']//text()[contains(.,'Einbauküche')]")
+            loader.add_xpath(
+                'balkon', "//ul[@class='checktaglist']//text()[contains(.,'Balkon')]")
+            loader.add_xpath(
+                'terrasse', "//ul[@class='checktaglist']//text()[contains(.,'Terrasse')]")
+            loader.add_xpath(
+                'provisionsfrei', "//text()[contains(.,'Keine zusätzliche Käuferprovision')]")
 
             yield loader.load_item()
 

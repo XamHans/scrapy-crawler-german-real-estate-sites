@@ -18,7 +18,7 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENTS =  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0'
+USER_AGENTS =  'Mozilla/5.0 (Linux; U; Android 2.2) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -35,7 +35,7 @@ DOWNLOAD_DELAY = 10
 # CONCURRENT_REQUESTS_PER_IP = 1
 
 # Disable cookies (enabled by default)
-COOKIES_ENABLED = True
+COOKIES_ENABLED = False
 
 
 # Disable Telnet Console (enabled by default)
@@ -83,7 +83,9 @@ AUTOTHROTTLE_MAX_DELAY = 35
 #AUTOTHROTTLE_DEBUG = False
 DOWNLOADER_MIDDLEWARES = {
 
-    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+      'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810
     # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     # 'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500
     # 'proxyMiddleware.ProxyMiddleware': 350,
@@ -93,7 +95,8 @@ DOWNLOADER_MIDDLEWARES = {
 }
 
 SPIDER_MIDDLEWARES = {
-    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100
+    
 
 }
 
@@ -108,4 +111,4 @@ HTTPCACHE_ENABLED = False
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-SPLASH_URL = 'localhost:8050'
+SPLASH_URL = 'http://immorobo.de:8050/'

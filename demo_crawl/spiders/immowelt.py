@@ -18,6 +18,7 @@ from scrapy.http import FormRequest
 import json
 from scrapy.exceptions import DropItem
 import traceback
+from selenium import webdriver
 
 
 class ImmoweltSpider(scrapy.Spider):

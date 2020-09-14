@@ -20,7 +20,8 @@ import signal
 from database import DataBase
 from ExtractViertel import ExtractViertel
 import traceback
-import pickle
+import scrapy_splash
+import base64
 
 class ImmoSpider(scrapy.Spider):
     custom_settings = {
@@ -61,12 +62,10 @@ class ImmoSpider(scrapy.Spider):
             self.stadtname = self.userToStadt["stadtname"]
             # self.stadtvid = self.userToStadt["StadtVid")
             print( ("IMMOSCOUT mache url {}").format(self.userToStadt['immoscout']))
-            headers = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
-
-            yield scrapy.Request(self.userToStadt['immoscout'],
-                                headers=headers,
+         
+            yield  scrapy_splash.SplashRequest(self.userToStadt['immoscout'],
                                 callback=self.detectPageStart,
-                                meta={"stadtid": self.stadtid})
+                                meta={"stadtid": self.stadtid, "proxy": "http://169.57.1.84:8123"})
    
         except Exception as e:
             print(e)
@@ -79,7 +78,9 @@ class ImmoSpider(scrapy.Spider):
         return spider
     
     def detectPageStart(self, response):
-        print(response)
+        print(response.body)
+       
+        return
         startPageUrl = self.getPagedUrl(response)
         print('PAGE START IST ' + str(startPageUrl))
         if startPageUrl is None:

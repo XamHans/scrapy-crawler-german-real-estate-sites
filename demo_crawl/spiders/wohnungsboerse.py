@@ -77,14 +77,18 @@ class WohnungsboerseSpider(scrapy.Spider):
                 return
 
             immos = response.xpath(
-                "//a[contains(@href,'immodetail')]/@href").extract()
+                "//a[contains(@href,'immodetail')]")
             stadtid = response.meta["stadtid"]
 
             for i in immos:
-                url = 'https://www.wohnungsboerse.net' + i
-                print(url)
-            #     if self.db.checkIfInDupUrl(url) == False:
-            #         yield scrapy.Request(url=url, callback=self.parse_item, dont_filter=True, meta={"stadtid": stadtid, "url": url})
+                url = i.xpath("@href").get()
+                image = i.xpath("img/@data-src").get()
+                if not "wohnungsboerse" in url:
+                    url = 'https://www.wohnungsboerse.net' + url
+             
+                if self.db.checkIfInDupUrl(url) == False:
+                    yield scrapy.Request(url=url, callback=self.parse_item, dont_filter=True,
+                                        meta={"stadtid": stadtid, "url": url, "imageurl":image})
             
             # next_page = response.xpath(
             #     "//a[@class='nextLink slink']/@href").get()
@@ -101,11 +105,13 @@ class WohnungsboerseSpider(scrapy.Spider):
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
             loader.add_xpath(
-                'title', "//h1[@class='headline-expose']/text()")
+                'title', "//h2[@class='dotdotdot']/text()")
             item['url'] = response.meta["url"]
+            imageurl = response.meta["imageurl"]
 
-            bilder = response.xpath("//div[@class='carousel-inner']//div/img/@src").getall()
+            bilder = response.xpath("//img[contains(@src, 'https://cdn.wohnungsboerse.net/img/thumbs')]/@src").getall()
             images = []
+            images.append(imageurl)
             for i in bilder:
                 try:
                     print(str(i))
@@ -117,30 +123,31 @@ class WohnungsboerseSpider(scrapy.Spider):
             except Exception as e:
                 logging.warning('fehler bei zuwesien von images to  item :' +str(e))
                 
-            zimmer = response.xpath("//div[@class='row margin-bottom-10']//div[3]/strong/text()").get()
             loader.add_xpath(
-                'zimmer', "//div[@class='row margin-bottom-10']//div[3]/strong/text()")
-            flache = response.xpath("//tr[@class='odd'][3]//td[@class='value']/text()").get()
+                'zimmer', "//dt[contains(text(),'ZIMMER')]//ancestor::dl/dd/text()")
+            loader.add_xpath(
+                'flache', "//dt[contains(text(),'FLÄCHE')]//ancestor::dl/dd/text()")
 
-            loader.add_value('flache', flache)  
             
             if self.Kaufen == 0:
                 
                 loader.add_value('kaufen', '0')    
-                gesamtk = response.xpath("//tr[@class='odd'][1]//td[@class='value']/text()").get()
+                gesamtk = response.xpath("//div/b[contains(text(),'Gesamt')]/../following-sibling::div[1]/div/text()").get()
+               
                 loader.add_value('gesamtkosten', gesamtk)
-         
-
             else:
                 loader.add_value('kaufen', '1')
                 loader.add_xpath(
-                    'gesamtkosten', "//tr[@class='odd'][1]//td[@class='value']/text()")
-                loader.add_xpath('provisionsfrei', "//text()[contains(.,'provisionsfrei')]")
+                    'gesamtkosten', "//dt[contains(text(),'KAUFPREIS')]/following-sibling::dd[1]/text()")
+                provisionfrei = response.xpath("//text()[contains(.,'Provision')]").get()
+                if provisionfrei:
+                    print(provisionfrei)
+                    loader.add_value('provisionsfrei', "1")
 
             if self.Haus == 1:
                 loader.add_value('haus', '1')
                 loader.add_xpath(
-                    'grundstuck', "//tr[@class='even'][3]//td[@class='value']/text()")
+                    'grundstuck', "//div[contains(text(),'Grundstücksfläche:')]//following-sibling::div[1]/text()")
             else:
                 loader.add_value('haus', '0')
            
@@ -157,18 +164,17 @@ class WohnungsboerseSpider(scrapy.Spider):
             loader.add_xpath(
                 'moebliert', "//text()[contains(.,'Möbliert')]")    
             loader.add_xpath(
-                'terrasse', "//text()[contains(.,'Terrassen')]")
+                'terrasse', "//text()[contains(.,'Terrasse')]")
             
             add = response.xpath(
-                    "//h2[@title='Daten']/text()").get()
+                    "//div[@class='mb-2 mb-lg-3 pl-3 pl-lg-0']/text()").get()
          
             if add:
-                add = add.split('-')[1]
                 loader.add_value('adresse', str(add).encode("utf-8"))
             
 
             loader.add_value('stadtid', self.stadtid)
-            loader.add_value('anbieter', "7")
+            loader.add_value('anbieter', "9")
             loader.add_value('stadtname', self.stadtname)
 
             yield loader.load_item()
@@ -178,5 +184,5 @@ class WohnungsboerseSpider(scrapy.Spider):
             traceback.print_exception(type(e), e, e.__traceback__)
 
     def spider_closed(self, spider):
-        print("WOHNUNGSMARKT 24 scraped :" + 
+        print("WOHNUNGSBOERSE scraped :" + 
         str(spider.crawler.stats.get_value('item_scraped_count')))
