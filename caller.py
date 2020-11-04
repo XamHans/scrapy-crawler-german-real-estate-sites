@@ -3,6 +3,7 @@
 
 from database import DataBase
 from datetime import datetime
+from Notify import Notify
 import requests
 import json
 import time
@@ -12,7 +13,7 @@ db = DataBase()
 stadtList = db.findAllStadtUrl()
 stadtCounter = 0
 
-immoAnbieter = [ "immonet", "meinestadt", "sparkasse", "wohnungsmarkt24", "ohnemakler", "ebay", "wohnungsboerse"]
+immoAnbieter = [ "immonet", "meinestadt", "sparkasse", "wohnungsmarkt24", "ohnemakler", "ebay", "kalay", "wohnungsboerse"]
 # immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
 
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
@@ -27,7 +28,7 @@ nodes = nodes + nodes2
 # A callback that unpacks and prints the results of a DeferredList
 
 def _crawl():
-
+	
 	global stadtList, stadtCounter
 	for entry in stadtList:
 		try:
@@ -55,7 +56,9 @@ def _crawl():
 				data['spider'] = anbieter
 				response = requests.post(node, data=data)
 				#print(response.text)
-
+			if datetime.now().hour == 13:
+				Notify(entry)
+    
 		except Exception as e:
 			print(e)
 		

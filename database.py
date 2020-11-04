@@ -56,6 +56,15 @@ class DataBase:
         foundStadt = self.mydb['stadte'].find_one({'id': int(stadtid)})
         return foundStadt
     
+    def checkIfNewImmos(self, start, end, entry):
+        foundImmos = self.mydb['immos'].find({   
+            'createdAt': { "$gte": start - timedelta(hours=3), "$lt": end },
+            'standortDaten.Stadt.id' : int(entry['stadtid']),
+            'immobilienTypDaten.immoRentType': int(entry['kaufen']),
+            'immobilienTypDaten.immoType': int(entry['haus']) 
+            })
+        return list(foundImmos)
+ 
     def findStadtViertel(self, viertel, stadtid):
         print('VIERTEL IST ' + str(viertel))
         cursor = self.mydb['stadte'].aggregate([
