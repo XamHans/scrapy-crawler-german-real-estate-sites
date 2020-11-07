@@ -7,7 +7,8 @@ class Telegram:
                 <a href='{link}'><b>{title}</b></a>         
                 &#8226;Gesamtmiete: {gesamtkosten}€
                 &#8226;Gesamtfläche: {flache}qm²
-                &#8226;Zimmer: {zimmer}            
+                &#8226;Zimmer: {zimmer}   
+                Mehrere Angebote findest du unter <a href='https://www.immorobo.de'>ImmoRobo.de</a>         
                 """.format(title=immo['title'], link=immo['url'], gesamtkosten=immo['gesamtkosten'], flache=immo['flache'],
                            zimmer=immo['zimmer'] )
                 

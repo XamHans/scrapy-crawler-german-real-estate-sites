@@ -386,7 +386,7 @@ class MongoDbPipeline(object):
 
                     self.mydb.insertMongoImmos(mongoStructureItem)
                     self.telegramMsgCount += 1
-                    if item['images'] and self.telegramMsgCount % 5 == 0:
+                    if item['images'] and self.telegramMsgCount % 5 == 0:           
                         Telegram.send_message(item)
                 except Exception as e:
                     print('FEHLER' + str(e))
