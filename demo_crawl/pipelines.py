@@ -24,6 +24,7 @@ import requests
 class MongoDbPipeline(object):
 
     stopCondition = 0
+    telegramMsgCount = 0
     extractor = None
     conn = None
     mydb = None
@@ -384,9 +385,8 @@ class MongoDbPipeline(object):
                         mongoStructureItem = self.transformItem(item)
 
                     self.mydb.insertMongoImmos(mongoStructureItem)
-                    print("das ist item ", str(item))
-                    if item['images']:
-                        print('send telegram')
+                    self.telegramMsgCount += 1
+                    if item['images'] and self.telegramMsgCount % 5 == 0:
                         Telegram.send_message(item)
                 except Exception as e:
                     print('FEHLER' + str(e))
