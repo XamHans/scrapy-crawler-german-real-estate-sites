@@ -14,12 +14,13 @@ class Notify:
    
     anfang = None
 
-    def __init__(self,entry):
+    def __init__(self):
         self.db = DataBase()
-        self.entry = entry
-        self.anfang = datetime.now()
-        self.showBenachrichtung(entry)
-        #threading.Timer(5.0, self.showBenachrichtung).start()
+        stadtList = self.db.findAllStadtUrl()
+        for entry in stadtList:
+            self.anfang = datetime.now()
+            self.showBenachrichtung(entry)
+        #threading.Timer(125.0, self.showBenachrichtung(entry)).start()
     
     def immosWithPictures(self, immo):
         if immo['fotoDaten']['images']:
@@ -40,7 +41,7 @@ class Notify:
                 route += '/mieten';
             else:
                 route += '/kaufen';
-            foundImmos = self.db.checkIfNewImmos(self.anfang, datetime.now(), self.entry)
+            foundImmos = self.db.checkIfNewImmos(self.anfang, datetime.now(), entry)
             foundImmos = list(filter(self.immosWithPictures, foundImmos))
 
             if foundImmos:
@@ -51,7 +52,9 @@ class Notify:
                     'image':        foundImmos[0]['fotoDaten']['images'][0],
                     'url': route    
                     }
-                response = requests.post("http://localhost:3000/api/notifications/notify", data=notify)
+                print('SENDE NOTIFY ', str(notify))
+                response = requests.post("https://www.immorobo.de/api/notifications/notify", data=notify)
+                #print(response)
             # ende =  - timedelta(hours=1)
             #ende = datetime.now() + timedelta(minutes=5)
             #print('anfang', str(self.anfang), '  ende ', str(ende))
@@ -82,3 +85,4 @@ class Notify:
                 registration_id=registration_id, message_title=message_title, message_body=message_body)
             print(result)
 
+Notify()

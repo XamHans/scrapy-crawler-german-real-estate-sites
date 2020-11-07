@@ -51,14 +51,12 @@ def _crawl():
    			'setting' : 'CLOSESPIDER_TIMEOUT=300',
 			'stadtId' : stadtid
 			}
-
+			
 			for anbieter in immoAnbieter:
 				data['spider'] = anbieter
 				response = requests.post(node, data=data)
 				#print(response.text)
-			if datetime.now().hour == 13:
-				Notify(entry)
-    
+		
 		except Exception as e:
 			print(e)
 		

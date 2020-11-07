@@ -200,6 +200,7 @@ class ImmobilieItem(scrapy.Item):
     stadtvid = scrapy.Field(input_processor=MapCompose(
         remove_whitespace), output_processor=TakeFirst())
     lat = scrapy.Field()
+    chatid = scrapy.Field()
     lon = scrapy.Field()
     createdat = scrapy.Field()
     alive = scrapy.Field()

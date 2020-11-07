@@ -89,7 +89,7 @@ class MeineStadtSpider(scrapy.Spider):
                     self.item, selector=response, response=response)
                 self.item["title"] = jsonitem["title"]
                 self.item["url"] = jsonitem["detailUrl"]
-
+                self.item["chatid"] = self.userToStadt["chatid"]
                 self.item["zimmer"] = jsonitem["rooms"]
                 self.item["flache"] = jsonitem["livingAreaRaw"]
                 self.item["lat"] = jsonitem["latitude"]

@@ -19,14 +19,14 @@ from database import DataBase
 import traceback
 import logging
 import uuid
-
+from telegram import Telegram
+import requests
 class MongoDbPipeline(object):
 
     stopCondition = 0
     extractor = None
     conn = None
     mydb = None
-
     def getLanLonOSM(self, add, item):
 
         geolocator = Nominatim(user_agent="IR")
@@ -382,7 +382,12 @@ class MongoDbPipeline(object):
                         mongoStructureItem = self.transformWGItem(item)
                     else:
                         mongoStructureItem = self.transformItem(item)
+
                     self.mydb.insertMongoImmos(mongoStructureItem)
+                    print("das ist item ", str(item))
+                    if item['images']:
+                        print('send telegram')
+                        Telegram.send_message(item)
                 except Exception as e:
                     print('FEHLER' + str(e))
                     logging.warning(e)

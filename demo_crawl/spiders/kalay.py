@@ -47,7 +47,7 @@ class KalaySpider(scrapy.Spider):
             self.Haus = self.userToStadt["haus"]
             self.stadtid = self.userToStadt["stadtid"]
             self.stadtname = self.userToStadt["stadtname"]
-            print( ("KALAY mache url {}").format(self.userToStadt['ebay']))
+            print( ("KALAY mache url {}").format(self.userToStadt['kalay']))
             yield scrapy.Request(self.userToStadt['kalay'], callback=self.parse, meta={"stadtid": self.stadtid})
         except Exception as e:
             print(e)
@@ -87,7 +87,7 @@ class KalaySpider(scrapy.Spider):
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
             item["url"] = response.url
-            
+            item["chatid"] = self.userToStadt["chatid"]
             if self.Haus == 1:
                 loader.add_value('haus', '1')
                 loader.add_xpath(

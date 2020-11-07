@@ -103,7 +103,7 @@ class ImmoSpider(scrapy.Spider):
             loader.add_xpath(
                 'title', "//h1[@class='headline-expose']/text()")
             item['url'] = response.meta["url"]
-
+            item["chatid"] = self.userToStadt["chatid"]     
             bilder = response.xpath("//div[@class='carousel-inner']//div/img/@src").getall()
             images = []
             for i in bilder:
