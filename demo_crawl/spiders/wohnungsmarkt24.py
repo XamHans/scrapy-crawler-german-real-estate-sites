@@ -78,7 +78,7 @@ class ImmoSpider(scrapy.Spider):
                 return
 
             immos = response.xpath(
-                "//p[@class='headline-se-1']/a/@href").extract()
+                "//*[@class='headline-se-1']/a/@href").extract()
             stadtid = response.meta["stadtid"]
 
             for i in immos:
