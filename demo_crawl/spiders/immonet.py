@@ -128,7 +128,8 @@ class ImmonetSpider(scrapy.Spider):
         try:
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
-            item["chatid"] = self.userToStadt["chatid"]
+            if 'chatid' in self.userToStadt:
+                item["chatid"] = self.userToStadt["chatid"]
 
             loader.add_xpath(
                 'title', "//h1[@id='expose-headline']/text()")

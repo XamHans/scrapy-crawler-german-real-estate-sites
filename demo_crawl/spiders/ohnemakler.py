@@ -106,7 +106,9 @@ class ImmoSpider(scrapy.Spider):
             loader.add_xpath(
                 'title', "//h1[@class='blue']/text()")
             item['url'] = response.meta["url"]
-            item["chatid"] = self.userToStadt["chatid"]
+            if 'chatid' in self.userToStadt:
+                item["chatid"] = self.userToStadt["chatid"]
+
             bilder = response.xpath("//a[contains(@class, 'pictures')]/@href").getall()
             images = []
             for i in bilder:

@@ -87,7 +87,8 @@ class KalaySpider(scrapy.Spider):
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
             item["url"] = response.url
-            item["chatid"] = self.userToStadt["chatid"]
+            if 'chatid' in self.userToStadt:
+                item["chatid"] = self.userToStadt["chatid"]
             if self.Haus == 1:
                 loader.add_value('haus', '1')
                 loader.add_xpath(

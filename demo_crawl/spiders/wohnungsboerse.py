@@ -108,7 +108,9 @@ class WohnungsboerseSpider(scrapy.Spider):
                 'title', "//h2[@class='dotdotdot']/text()")
             item['url'] = response.meta["url"]
             imageurl = response.meta["imageurl"]
-            item["chatid"] = self.userToStadt["chatid"]
+            if 'chatid' in self.userToStadt:
+                item["chatid"] = self.userToStadt["chatid"]
+
             bilder = response.xpath("//img[contains(@src, 'https://cdn.wohnungsboerse.net/img/thumbs')]/@src").getall()
             images = []
             images.append(imageurl)

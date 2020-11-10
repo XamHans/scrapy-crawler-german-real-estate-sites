@@ -62,7 +62,9 @@ class SparkasseSpider(scrapy.Spider):
 
             item = ImmobilieItem()
             loader = ItemLoader(item, selector=response, response=response)
-            item["chatid"] = self.userToStadt["chatid"]
+            if 'chatid' in self.userToStadt:
+                item["chatid"] = self.userToStadt["chatid"]
+
             loader.add_value("title", jsonitem["freitexte"]["objekttitel"])
             kaufpreis = ''
             if '.' in  jsonitem["preise"]["kaufpreis"]:
