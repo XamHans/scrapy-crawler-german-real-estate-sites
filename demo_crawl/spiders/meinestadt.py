@@ -84,6 +84,8 @@ class MeineStadtSpider(scrapy.Spider):
 
         for jsonitem in jsonresponse["searchboxResults"]["items"]:
             try:
+                if self.db.checkIfInDupUrl(jsonitem["detailUrl"]) == True:
+                    continue
                 self.item = ImmobilieItem()
                 loader = ItemLoader(
                     self.item, selector=response, response=response)
