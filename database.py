@@ -17,15 +17,7 @@ class DataBase:
     mongo_immos = mydb["immos"] 
   
 
-    def changePlz(self):
-       updateThose = self.mydb["stadte"].find({"PLZ":{ "$not": { "$size": 0} }})
-       for stadt in list(updateThose):
-            if "PLZ" in stadt:
-                stadt["PLZ"] = list(map(lambda plz : str(plz),  stadt["PLZ"]))
-                print(stadt["PLZ"])
-                result = self.mydb["stadte"].update_one(
-                    {"id" :stadt["id"]},
-                    {"$set": {"PLZ": stadt["PLZ"]}})
+ 
     def insertUrlsForKrit(self, kritUrls):
         try:
              self.mydb['stadturls'].insert_one(dict(kritUrls))
@@ -136,5 +128,3 @@ class DataBase:
         except Exception as e:
             print(str(e))
 
-db = DataBase()
-db.changePlz()
