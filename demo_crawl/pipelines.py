@@ -387,7 +387,7 @@ class MongoDbPipeline(object):
                     self.mydb.insertMongoImmos(mongoStructureItem)
                     if item['images'] and 'gesamtkosten' in item:
                         if int(item['gesamtkosten']) < 2000:
-                            Telegram.send_message(item)
+                            #Telegram.send_message(item)
                             
                 except Exception as e:
                     print('FEHLER' + str(e))

@@ -130,7 +130,7 @@ class KalaySpider(scrapy.Spider):
             try:
                 stadtPlz = response.xpath("(//table[@class='ad-info estate estate-content']//td[@class='label'])[1]/following-sibling::td/span/text()").get()
                 strasse = response.xpath("(//table[@class='ad-info estate estate-content']//td[@class='label'])[2]/following-sibling::td/span/text()").get()
-                adresse = strasse + stadtPlz
+                adresse = strasse + ', ' +  stadtPlz
                 if adresse:
                     loader.add_value('adresse', adresse)
             except Exception as e:
