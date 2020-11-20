@@ -146,7 +146,7 @@ class MongoDbPipeline(object):
                                 },
             'basisDaten':    
                                 {
-                                    'flache': item['flache'],
+                                    'flache':  item['flache'] if 'flache' in item else None,
                                     'zimmer': item['zimmer'],
                                     'bezugsfreiab': item['bezugsfreiab'] if 'bezugsfreiab' in item else None
                                 },
