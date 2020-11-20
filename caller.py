@@ -13,7 +13,7 @@ db = DataBase()
 stadtList = db.findAllStadtUrl()
 stadtCounter = 0
 
-immoAnbieter = [ "immonet", "meinestadt", "sparkasse", "wohnungsmarkt24", "ohnemakler", "ebay", "kalay", "wohnungsboerse", "berlin"]
+immoAnbieter = [ "immonet", "meinestadt", "sparkasse", "wohnungsmarkt24", "ohnemakler", "ebay", "kalay", "wohnungsboerse"]
 # immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
 
 nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
@@ -32,33 +32,31 @@ def _crawl():
 	global stadtList, stadtCounter
 	for entry in stadtList:
 		try:
-		
+			if stadtCounter > 9:
+				stadtCounter = 0
+				print('MACHE PAUSE')
+				time.sleep(60 * 2)  
+			
+			node = nodes[stadtCounter]
+			stadtCounter += 1
 			if datetime.now().hour == 7:
 				db.deleteEntriesFromYesterday(entry)
+			print('NODE '+ node + ' MACHT ENTRY '+ str(entry['stadtname']) + str(entry['haus']) + str(entry['kaufen']) ) 
 			
 			stadtid = entry['_id'] 
 
 			data = {
 			'project' : 'default',
+			'spider' : 'immonet',
    			'setting' : 'CLOSESPIDER_TIMEOUT=300',
 			'stadtId' : stadtid
 			}
 			
-			# for anbieter in immoAnbieter:
-			# 	if stadtCounter > 9:
-			# 			stadtCounter = 0
-			# 			print('MACHE PAUSE')
-			# 			return
-			# 			time.sleep(60 * 2)  
-					
-				#node = nodes[stadtCounter]
-				#stadtCounter += 1
-			data['spider'] = 'berlin'
-			response = requests.post("http://immorobo-8.herokuapp.com:80/schedule.json", data=data)
-			# print('NODE '+ node + ' MACHTT ANBIETER' + anbieter ) 
-			print(response.text)
-			return
-	
+			for anbieter in immoAnbieter:
+				data['spider'] = anbieter
+				response = requests.post(node, data=data)
+				print(response.text)
+		
 		except Exception as e:
 			print(e)
 		
