@@ -96,8 +96,11 @@ class SueddeutscheSpider(scrapy.Spider):
             kosten = None
             if self.Kaufen == 0:
                 loader.add_value('kaufen', '0')
-                kosten = response.xpath("(//td[@class='firstTd2']/following-sibling::td/div/text())[1]").get()
-               
+                # here warm miete text ergänzen ansonten such nach kaltmiete
+                kosten = response.xpath("(//text()[contains(.,'Miete inkl. NK')])/../../following-sibling::td/div/text()").get()
+                if not kosten:
+                    kosten = response.xpath("(//text()[contains(.,'Miete zzgl. NK')])/../../following-sibling::td/div/text()").get()
+
             else:   
                 loader.add_value('kaufen', '1')
                 kosten = response.xpath("(//text()[contains(.,'Kaufpreis')])/../../following-sibling::td/div/text()").get()
@@ -110,19 +113,20 @@ class SueddeutscheSpider(scrapy.Spider):
                 print("KOSTEN NICHT GEFUNDEN : ", kosten )
                 print("CHECK SELBST: ", response.url)
                 return 
+            
             if not self.hasNumbers(kosten):
                 print('KEIN NUMBERS GEFUNDEN IN KOSTEN ' + str(kosten))
                 return
          
             loader.add_value('gesamtkosten', kosten)
 
-            flache = response.xpath("(//div[@class='attribute']/div[@class='value']/text())[1]").get()
+            flache = response.xpath("(//text()[contains(.,'Wohnfläche')])/../../../div[@class='value']/text()").get()
             if self.hasNumbers(flache):
                 if ',' in str(flache):
                     flache = flache.split(',')[0]
                 loader.add_value('flache', flache)
             
-            loader.add_xpath('zimmer',"(//div[@class='attribute']/div[@class='value']/text())[2]")
+            loader.add_xpath('zimmer',"(//text()[contains(.,'Zimmeranzahl')])/../../div[@class='value']/text()")
             
             try:
                 adresse = ''
