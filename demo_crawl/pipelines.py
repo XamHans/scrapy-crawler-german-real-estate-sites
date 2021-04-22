@@ -105,7 +105,7 @@ class MongoDbPipeline(object):
 
     def __init__(self):
         try:
-            self.mongo_uri = 'mongodb://root:schranknr8@173.212.249.71:27017'
+            self.mongo_uri = "mongodb://hans:DopeDaysGone1807!@161.97.79.7:30001/immo_db?authSource=admin"
             self.mongo_db = 'immo_db'
             self.mydb = DataBase()
             # self.conn = self.mydb.create_conn()
