@@ -76,10 +76,7 @@ class MeineStadtSpider(scrapy.Spider):
             print('ciao')
             return
 
-        jsonresponse = json.loads(
-            response.body.decode('utf-8'), encoding='utf-8')
-
-        for jsonitem in jsonresponse["searchboxResults"]["items"]:
+        for jsonitem in response["searchboxResults"]["items"]:
             try:
                 if self.db.checkIfInDupUrl(jsonitem["detailUrl"]) == True:
                     continue
