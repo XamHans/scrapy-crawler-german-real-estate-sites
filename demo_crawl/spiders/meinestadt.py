@@ -40,13 +40,14 @@ class MeineStadtSpider(scrapy.Spider):
     item = None
 
     def __init__(self, stadtId, jsonResponse, *args, **kwargs):
-        self.db = DataBase()
-        # self.conn = self.db.create_conn()
-        self.userToStadt = self.db.findStadtUrls(stadtId)
-        self.jsonResponse = jsonResponse
-        self.extractor = ExtractViertel()
-        self.extractor.init()
+       
         try:
+            self.db = DataBase()
+            # self.conn = self.db.create_conn()
+            self.userToStadt = self.db.findStadtUrls(stadtId)
+            self.jsonResponse = jsonResponse
+            self.extractor = ExtractViertel()
+            self.extractor.init()
             self.Kaufen = self.userToStadt["kaufen"]
             self.Haus = self.userToStadt["haus"]
             self.stadtid = self.userToStadt["stadtid"]
