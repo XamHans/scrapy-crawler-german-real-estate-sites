@@ -36,7 +36,6 @@ class MeineStadtSpider(scrapy.Spider):
     jsonResponse = None
     stop = False
     userToStadt = None
-    extractor = None
     item = None
 
     def __init__(self, stadtId, jsonResponse, *args, **kwargs):
@@ -46,8 +45,6 @@ class MeineStadtSpider(scrapy.Spider):
             # self.conn = self.db.create_conn()
             self.userToStadt = self.db.findStadtUrls(stadtId)
             self.jsonResponse = jsonResponse
-            self.extractor = ExtractViertel()
-            self.extractor.init()
             self.Kaufen = self.userToStadt["kaufen"]
             self.Haus = self.userToStadt["haus"]
             self.stadtid = self.userToStadt["stadtid"]
@@ -148,11 +145,6 @@ class MeineStadtSpider(scrapy.Spider):
                                 "//div[@class='section_content'][2]/p/text()")
 
             stadtvid = 0
-            # if self.item['adresse']:
-            #     stadtvid = self.extractor.extractAdresse(
-            #          str(self.item['adresse']), 1, self.stadtid)
-            # self.item['stadtvid'] = stadtvid
-
             bilder = response.xpath(
                 "//div[ contains(@class,'m-gallery__imageContainer')]/img[contains(@class,'ImageNormal')]/@data-flickity-lazyload-src").getall()
             if bilder == None or len(bilder) == 0:
