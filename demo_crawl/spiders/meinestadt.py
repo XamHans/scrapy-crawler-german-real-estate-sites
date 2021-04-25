@@ -36,25 +36,32 @@ class MeineStadtSpider(scrapy.Spider):
     jsonResponse = None
     stop = False
     userToStadt = None
+    extractor = None
     item = None
 
     def __init__(self, stadtId, jsonResponse, *args, **kwargs):
-       
+        self.db = DataBase()
+        # self.conn = self.db.create_conn()
+        self.userToStadt = self.db.findStadtUrls(stadtId)
+        self.jsonResponse = jsonResponse
+        self.extractor = ExtractViertel()
+        self.extractor.init()
+        super(MeineStadtSpider, self).__init__(*args, **kwargs)
+
+    def start_requests(self):
+
         try:
-            self.db = DataBase()
-            # self.conn = self.db.create_conn()
-            self.userToStadt = self.db.findStadtUrls(stadtId)
-            self.jsonResponse = jsonResponse
             self.Kaufen = self.userToStadt["kaufen"]
             self.Haus = self.userToStadt["haus"]
             self.stadtid = self.userToStadt["stadtid"]
             self.stadtname = self.userToStadt["stadtname"]
             # self.stadtvid = self.userToStadt["StadtVid")
             print( ("MEINESTADT mache url {}").format(self.userToStadt['meinestadt']))
-            self.parse(self.jsonResponse)
+            yield scrapy.Request('http://scrapy.org', callback=self.parse)
+
         except Exception as e:
             print(e)
-     
+
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(MeineStadtSpider, cls).from_crawler(
@@ -66,11 +73,8 @@ class MeineStadtSpider(scrapy.Spider):
   
     def parse(self, response):
         
-        if not response:
-            print('ciao')
-            return
-
-        for jsonitem in response["searchboxResults"]["items"]:
+        
+        for jsonitem in self.jsonResponse["searchboxResults"]["items"]:
             try:
                 if self.db.checkIfInDupUrl(jsonitem["detailUrl"]) == True:
                     continue
@@ -145,6 +149,11 @@ class MeineStadtSpider(scrapy.Spider):
                                 "//div[@class='section_content'][2]/p/text()")
 
             stadtvid = 0
+            # if self.item['adresse']:
+            #     stadtvid = self.extractor.extractAdresse(
+            #          str(self.item['adresse']), 1, self.stadtid)
+            # self.item['stadtvid'] = stadtvid
+
             bilder = response.xpath(
                 "//div[ contains(@class,'m-gallery__imageContainer')]/img[contains(@class,'ImageNormal')]/@data-flickity-lazyload-src").getall()
             if bilder == None or len(bilder) == 0:
