@@ -46,10 +46,6 @@ class MeineStadtSpider(scrapy.Spider):
         self.jsonResponse = jsonResponse
         self.extractor = ExtractViertel()
         self.extractor.init()
-        super(MeineStadtSpider, self).__init__(*args, **kwargs)
-
-    def start_requests(self):
-
         try:
             self.Kaufen = self.userToStadt["kaufen"]
             self.Haus = self.userToStadt["haus"]
@@ -60,7 +56,7 @@ class MeineStadtSpider(scrapy.Spider):
             self.parse(self.jsonResponse)
         except Exception as e:
             print(e)
-
+     
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(MeineStadtSpider, cls).from_crawler(
@@ -75,7 +71,7 @@ class MeineStadtSpider(scrapy.Spider):
         if not response:
             print('ciao')
             return
-            
+
         for jsonitem in response["searchboxResults"]["items"]:
             try:
                 if self.db.checkIfInDupUrl(jsonitem["detailUrl"]) == True:
