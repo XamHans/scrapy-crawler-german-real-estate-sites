@@ -75,7 +75,7 @@ class MeineStadtSpider(scrapy.Spider):
         if not response:
             print('ciao')
             return
-
+            
         for jsonitem in response["searchboxResults"]["items"]:
             try:
                 if self.db.checkIfInDupUrl(jsonitem["detailUrl"]) == True:
