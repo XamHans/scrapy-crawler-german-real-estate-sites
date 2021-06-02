@@ -31,19 +31,21 @@ class MeineStadtSpider(scrapy.Spider):
     Kaufen = 0
     Haus = 0
     stadtid = 0
+    urlCounter = 1
     stadtname = ""
+    standardurl = ""
+    driver = None
     id = 0
-    jsonResponse = None
+    conn = None
     stop = False
     userToStadt = None
     extractor = None
     item = None
 
-    def __init__(self, stadtId, jsonResponse, *args, **kwargs):
+    def __init__(self, stadtId, *args, **kwargs):
         self.db = DataBase()
         # self.conn = self.db.create_conn()
         self.userToStadt = self.db.findStadtUrls(stadtId)
-        self.jsonResponse = jsonResponse
         self.extractor = ExtractViertel()
         self.extractor.init()
         super(MeineStadtSpider, self).__init__(*args, **kwargs)
@@ -57,8 +59,8 @@ class MeineStadtSpider(scrapy.Spider):
             self.stadtname = self.userToStadt["stadtname"]
             # self.stadtvid = self.userToStadt["StadtVid")
             print( ("MEINESTADT mache url {}").format(self.userToStadt['meinestadt']))
-            yield scrapy.Request('http://scrapy.org', callback=self.parse)
 
+            yield scrapy.Request(self.userToStadt['meinestadt'], callback=self.parse)
         except Exception as e:
             print(e)
 
@@ -73,8 +75,14 @@ class MeineStadtSpider(scrapy.Spider):
   
     def parse(self, response):
         
-        
-        for jsonitem in self.jsonResponse["searchboxResults"]["items"]:
+        if response.status == 403:
+            print("BLOCKED BY MEINESTADT")
+            return
+
+        jsonresponse = json.loads(
+            response.body.decode('utf-8'), encoding='utf-8')
+
+        for jsonitem in jsonresponse["searchboxResults"]["items"]:
             try:
                 if self.db.checkIfInDupUrl(jsonitem["detailUrl"]) == True:
                     continue
