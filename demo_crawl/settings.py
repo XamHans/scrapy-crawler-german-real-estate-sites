@@ -111,11 +111,9 @@ API_SCRAPOXY_PASSWORD = 'Schranknr8!'
 
 DOWNLOADER_MIDDLEWARES = {
  'scrapoxy.downloadmiddlewares.proxy.ProxyMiddleware': 100,
-    'scrapoxy.downloadmiddlewares.wait.WaitMiddleware': 101,
-    'scrapoxy.downloadmiddlewares.scale.ScaleMiddleware': 102,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500,
+    'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 101,
 }
 
 SPIDER_MIDDLEWARES = {
