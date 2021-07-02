@@ -5,3 +5,5 @@ pymongo
 scrapyd
 logparser
 herokuify-scrapyd
+scrapy-useragents
+scrapoxy
