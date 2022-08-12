@@ -25,15 +25,9 @@ process = CrawlerProcess(settings)
 
 immoAnbieter = [ "immonet", "immoscout", "meinestadt"]
  
-nodes = [ 'http://immorobo.herokuapp.com:80/schedule.json', 'http://immorobo-1.herokuapp.com:80/schedule.json',
-        'http://immorobo-2.herokuapp.com:80/schedule.json','http://immorobo-3.herokuapp.com:80/schedule.json',
-        'http://immorobo-4.herokuapp.com:80/schedule.json' ]
+nodes = [ 'http://herokuapp.com:80/schedule.json' ]
 
-nodes2 = [ 'http://immorobo-5.herokuapp.com:80/schedule.json',  'http://immorobo-6.herokuapp.com:80/schedule.json',
-           'http://immorobo-7.herokuapp.com:80/schedule.json',  'http://immorobo-8.herokuapp.com:80/schedule.json',
-            'http://immorobo-9.herokuapp.com:80/schedule.json'     ]
 
-nodes = nodes + nodes2
 # A callback that unpacks and prints the results of a DeferredList
 
 def printResult(result, stadtid, timebeforeCrawl):
