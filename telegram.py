@@ -12,7 +12,7 @@ class Telegram:
                 """.format(title=immo['title'], link=immo['url'], gesamtkosten=immo['gesamtkosten'], flache=immo['flache'],
                            zimmer=immo['zimmer'] )
                 
-                token="1477608628:AAEsHAgmznQX8saJg1pmmAhayYkqVMNPL4o"
+                token="xxx"
                 url = f'https://api.telegram.org/bot{token}/sendPhoto'
                 data = {'chat_id': {immo['chatid']},
                         'photo':immo['images'][0],
